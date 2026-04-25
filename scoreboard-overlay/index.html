@@ -24,50 +24,25 @@
       padding-bottom: 78px;
     }
     .broadcast {
-      position: relative;
-      width: 1560px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(16, 16, 16, 0.9);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      box-shadow: 0 26px 60px rgba(2, 6, 23, 0.55);
-      overflow: hidden;
-    }
-    .broadcast::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255, 255, 255, 0.02);
-      pointer-events: none;
+      width: 1440px;
     }
     .row {
       display: flex;
-      align-items: stretch;
-      min-height: 186px;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      min-height: 170px;
     }
     .side {
-      flex: 1;
-      min-width: 0;
+      width: 500px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      gap: 10px;
-      padding: 24px 26px;
-    }
-    .side.left {
-      border-right: 1px solid rgba(255,255,255,0.1);
-      background: rgba(30, 30, 30, 0.9);
-    }
-    .side.right {
-      border-left: 1px solid rgba(255,255,255,0.1);
-      background: rgba(30, 30, 30, 0.9);
+      gap: 8px;
+      padding: 0;
     }
     .side-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 2px;
+      display: none;
     }
     .side-label { display: none; }
     .race-chip {
@@ -81,9 +56,9 @@
       font-size: 14px;
       font-weight: 700;
       letter-spacing: 0.03em;
-      color: #e2e8f0;
-      background: rgba(15, 23, 42, 0.78);
-      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #000;
+      background: #fff;
+      border: 2px solid #000;
     }
     .players {
       display: grid;
@@ -94,20 +69,26 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 7px 11px;
+      padding: 12px 14px;
       border-radius: 10px;
-      background: rgba(2, 6, 23, 0.34);
-      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: #fff;
+      border: 2px solid #000;
+    }
+    .side.right .player-row {
+      flex-direction: row-reverse;
     }
     .player-name {
       font-size: 28px;
       font-weight: 780;
-      color: #f8fafc;
+      color: #000;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       letter-spacing: 0.01em;
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+    }
+    .side.right .player-name {
+      text-align: right;
     }
     .fargo-chip {
       min-width: 62px;
@@ -119,22 +100,19 @@
       justify-content: center;
       font-size: 15px;
       font-weight: 750;
-      color: #f3f4f6;
-      background: rgba(55, 55, 55, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #000;
+      background: #fff;
+      border: 2px solid #000;
       flex-shrink: 0;
     }
     .center {
-      width: 320px;
+      width: 360px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-      padding: 20px 16px;
-      background: rgba(20, 20, 20, 0.95);
-      border-left: 1px solid rgba(255,255,255,0.1);
-      border-right: 1px solid rgba(255,255,255,0.1);
+      gap: 8px;
+      padding: 0;
     }
     .center-top { display: none; }
     .scores {
@@ -144,9 +122,28 @@
       gap: 12px;
       width: 100%;
     }
+    .score-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .score-race {
+      min-width: 88px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 2px solid #000;
+      background: #fff;
+      color: #000;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      text-align: center;
+    }
     .score-box {
-      width: 128px;
-      height: 108px;
+      width: 142px;
+      height: 118px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -154,18 +151,39 @@
       font-size: 78px;
       font-weight: 860;
       line-height: 1;
-      color: #fff;
+      color: #000;
       text-shadow: 0 5px 22px rgba(0, 0, 0, 0.42);
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(36, 36, 36, 0.95);
+      border: 2px solid #000;
+      background: #fff;
     }
     .score-divider {
       font-size: 44px;
       font-weight: 700;
-      color: rgba(148,163,184,0.82);
+      color: #000;
       transform: translateY(-3px);
     }
     .meta { display: none; }
+    .race-center {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 2px solid #000;
+      background: #fff;
+      color: #000;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .race-center b {
+      font-weight: 800;
+      color: #000;
+      min-width: 20px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -187,10 +205,17 @@
       <div class="center">
         <div class="center-top"></div>
         <div class="scores">
-          <span class="score-box" id="score1">0</span>
+          <div class="score-col">
+            <span class="score-race" id="raceScoreLeft">Race -</span>
+            <span class="score-box" id="score1">0</span>
+          </div>
           <span class="score-divider">-</span>
-          <span class="score-box" id="score2">0</span>
+          <div class="score-col">
+            <span class="score-race" id="raceScoreRight">Race -</span>
+            <span class="score-box" id="score2">0</span>
+          </div>
         </div>
+        <div class="race-center" id="raceCenter">Race To <b id="raceCenterValue">-</b></div>
         <div class="meta" id="fargoMeta"></div>
       </div>
       <div class="side right">
@@ -251,6 +276,8 @@
         var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : '-').toString();
         var showRace = asBool(d.showRace, true);
         var showFargo = asBool(d.showFargo, false);
+        var sameRace = raceTo1 === raceTo2;
+        var raceCenter = sameRace ? raceTo1 : raceTo1 + '/' + raceTo2;
 
         document.getElementById('p1aName').textContent = p1a;
         document.getElementById('p2aName').textContent = p2a;
@@ -258,11 +285,17 @@
         document.getElementById('fargo2a').textContent = f2a || '---';
         document.getElementById('raceLeft').textContent = 'Race ' + raceTo1;
         document.getElementById('raceRight').textContent = 'Race ' + raceTo2;
+        document.getElementById('raceScoreLeft').textContent = 'Race ' + raceTo1;
+        document.getElementById('raceScoreRight').textContent = 'Race ' + raceTo2;
+        document.getElementById('raceCenterValue').textContent = raceCenter || '-';
         document.getElementById('score1').textContent = s1;
         document.getElementById('score2').textContent = s2;
 
         document.getElementById('raceLeft').style.display = showRace ? 'inline-flex' : 'none';
         document.getElementById('raceRight').style.display = showRace ? 'inline-flex' : 'none';
+        document.getElementById('raceCenter').style.display = showRace && sameRace ? 'inline-flex' : 'none';
+        document.getElementById('raceScoreLeft').style.display = showRace && !sameRace ? 'inline-flex' : 'none';
+        document.getElementById('raceScoreRight').style.display = showRace && !sameRace ? 'inline-flex' : 'none';
         document.getElementById('fargoMeta').style.display = showFargo ? 'block' : 'none';
         document.getElementById('fargo1a').style.display = showFargo ? 'inline-flex' : 'none';
         document.getElementById('fargo2a').style.display = showFargo ? 'inline-flex' : 'none';
