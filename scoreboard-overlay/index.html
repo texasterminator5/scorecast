@@ -28,9 +28,7 @@
       width: 1560px;
       border-radius: 20px;
       border: 1px solid rgba(255, 255, 255, 0.16);
-      background:
-        linear-gradient(135deg, rgba(15,23,42,0.86), rgba(15,23,42,0.78)),
-        linear-gradient(90deg, rgba(56,189,248,0.32), rgba(59,130,246,0.2), rgba(217,70,239,0.28));
+      background: rgba(16, 16, 16, 0.9);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       box-shadow: 0 26px 60px rgba(2, 6, 23, 0.55);
@@ -40,9 +38,7 @@
       content: '';
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(500px 100px at 20% 0%, rgba(56,189,248,0.22), transparent 65%),
-        radial-gradient(500px 120px at 80% 0%, rgba(217,70,239,0.2), transparent 65%);
+      background: rgba(255, 255, 255, 0.02);
       pointer-events: none;
     }
     .row {
@@ -61,11 +57,11 @@
     }
     .side.left {
       border-right: 1px solid rgba(255,255,255,0.1);
-      background: linear-gradient(90deg, rgba(56,189,248,0.16), rgba(56,189,248,0.04));
+      background: rgba(30, 30, 30, 0.9);
     }
     .side.right {
       border-left: 1px solid rgba(255,255,255,0.1);
-      background: linear-gradient(270deg, rgba(217,70,239,0.16), rgba(217,70,239,0.04));
+      background: rgba(30, 30, 30, 0.9);
     }
     .side-head {
       display: flex;
@@ -73,13 +69,7 @@
       justify-content: space-between;
       margin-bottom: 2px;
     }
-    .side-label {
-      font-size: 15px;
-      color: rgba(226, 232, 240, 0.85);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
+    .side-label { display: none; }
     .race-chip {
       display: inline-flex;
       align-items: center;
@@ -129,9 +119,9 @@
       justify-content: center;
       font-size: 15px;
       font-weight: 750;
-      color: #bfdbfe;
-      background: rgba(30, 64, 175, 0.24);
-      border: 1px solid rgba(96, 165, 250, 0.45);
+      color: #f3f4f6;
+      background: rgba(55, 55, 55, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.2);
       flex-shrink: 0;
     }
     .center {
@@ -142,19 +132,11 @@
       align-items: center;
       gap: 10px;
       padding: 20px 16px;
-      background:
-        linear-gradient(180deg, rgba(15,23,42,0.7), rgba(15,23,42,0.82)),
-        radial-gradient(400px 120px at 50% 0%, rgba(96,165,250,0.24), transparent 70%);
+      background: rgba(20, 20, 20, 0.95);
       border-left: 1px solid rgba(255,255,255,0.1);
       border-right: 1px solid rgba(255,255,255,0.1);
     }
-    .center-top {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: rgba(148, 163, 184, 0.95);
-      font-weight: 700;
-    }
+    .center-top { display: none; }
     .scores {
       display: flex;
       align-items: center;
@@ -175,7 +157,7 @@
       color: #fff;
       text-shadow: 0 5px 22px rgba(0, 0, 0, 0.42);
       border: 1px solid rgba(255,255,255,0.2);
-      background: linear-gradient(180deg, rgba(15,23,42,0.52), rgba(2,6,23,0.72));
+      background: rgba(36, 36, 36, 0.95);
     }
     .score-divider {
       font-size: 44px;
@@ -183,13 +165,7 @@
       color: rgba(148,163,184,0.82);
       transform: translateY(-3px);
     }
-    .meta {
-      font-size: 13px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: rgba(148,163,184,0.95);
-      font-weight: 700;
-    }
+    .meta { display: none; }
   </style>
 </head>
 <body>
@@ -198,7 +174,7 @@
     <div class="row">
       <div class="side left">
         <div class="side-head">
-          <span class="side-label">Left Side</span>
+          <span class="side-label"></span>
           <span class="race-chip" id="raceLeft">Race -</span>
         </div>
         <div class="players">
@@ -206,34 +182,26 @@
             <span class="player-name" id="p1aName">Player</span>
             <span class="fargo-chip" id="fargo1a">---</span>
           </div>
-          <div class="player-row">
-            <span class="player-name" id="p1bName">Player</span>
-            <span class="fargo-chip" id="fargo1b">---</span>
-          </div>
         </div>
       </div>
       <div class="center">
-        <div class="center-top">Scoreboard</div>
+        <div class="center-top"></div>
         <div class="scores">
           <span class="score-box" id="score1">0</span>
           <span class="score-divider">-</span>
           <span class="score-box" id="score2">0</span>
         </div>
-        <div class="meta" id="fargoMeta">Fargo Ratings</div>
+        <div class="meta" id="fargoMeta"></div>
       </div>
       <div class="side right">
         <div class="side-head">
-          <span class="side-label">Right Side</span>
+          <span class="side-label"></span>
           <span class="race-chip" id="raceRight">Race -</span>
         </div>
         <div class="players">
           <div class="player-row">
             <span class="player-name" id="p2aName">Player</span>
             <span class="fargo-chip" id="fargo2a">---</span>
-          </div>
-          <div class="player-row">
-            <span class="player-name" id="p2bName">Player</span>
-            <span class="fargo-chip" id="fargo2b">---</span>
           </div>
         </div>
       </div>
@@ -274,13 +242,9 @@
       function applyState(data) {
         var d = data || {};
         var p1a = (d.p1a != null ? d.p1a : d.team1 != null ? d.team1 : 'Player').toString();
-        var p1b = (d.p1b != null ? d.p1b : 'Player').toString();
         var p2a = (d.p2a != null ? d.p2a : d.team2 != null ? d.team2 : 'Player').toString();
-        var p2b = (d.p2b != null ? d.p2b : 'Player').toString();
         var f1a = (d.fargo1a != null ? d.fargo1a : '').toString();
-        var f1b = (d.fargo1b != null ? d.fargo1b : '').toString();
         var f2a = (d.fargo2a != null ? d.fargo2a : '').toString();
-        var f2b = (d.fargo2b != null ? d.fargo2b : '').toString();
         var s1 = (d.s1 != null ? d.s1 : 0).toString();
         var s2 = (d.s2 != null ? d.s2 : 0).toString();
         var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : '-').toString();
@@ -289,13 +253,9 @@
         var showFargo = asBool(d.showFargo, false);
 
         document.getElementById('p1aName').textContent = p1a;
-        document.getElementById('p1bName').textContent = p1b;
         document.getElementById('p2aName').textContent = p2a;
-        document.getElementById('p2bName').textContent = p2b;
         document.getElementById('fargo1a').textContent = f1a || '---';
-        document.getElementById('fargo1b').textContent = f1b || '---';
         document.getElementById('fargo2a').textContent = f2a || '---';
-        document.getElementById('fargo2b').textContent = f2b || '---';
         document.getElementById('raceLeft').textContent = 'Race ' + raceTo1;
         document.getElementById('raceRight').textContent = 'Race ' + raceTo2;
         document.getElementById('score1').textContent = s1;
@@ -305,9 +265,7 @@
         document.getElementById('raceRight').style.display = showRace ? 'inline-flex' : 'none';
         document.getElementById('fargoMeta').style.display = showFargo ? 'block' : 'none';
         document.getElementById('fargo1a').style.display = showFargo ? 'inline-flex' : 'none';
-        document.getElementById('fargo1b').style.display = showFargo ? 'inline-flex' : 'none';
         document.getElementById('fargo2a').style.display = showFargo ? 'inline-flex' : 'none';
-        document.getElementById('fargo2b').style.display = showFargo ? 'inline-flex' : 'none';
       }
 
       if (room && dbUrl) {
@@ -322,13 +280,9 @@
         var t2 = params.get('team2');
         applyState({
           p1a: params.get('p1a') || (t1 ? decodeURIComponent(t1) : 'Player'),
-          p1b: params.get('p1b') || 'Player',
           p2a: params.get('p2a') || (t2 ? decodeURIComponent(t2) : 'Player'),
-          p2b: params.get('p2b') || 'Player',
           fargo1a: params.get('fargo1a') || '',
-          fargo1b: params.get('fargo1b') || '',
           fargo2a: params.get('fargo2a') || '',
-          fargo2b: params.get('fargo2b') || '',
           showRace: params.get('showRace'),
           showFargo: params.get('showFargo'),
           s1: params.get('s1') || '0',

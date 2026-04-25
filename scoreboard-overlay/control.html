@@ -9,10 +9,7 @@
     html, body { min-height: 100%; }
     body {
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background:
-        radial-gradient(1200px 600px at 15% -10%, rgba(99,102,241,0.35), transparent 60%),
-        radial-gradient(900px 500px at 85% 0%, rgba(6,182,212,0.2), transparent 60%),
-        linear-gradient(160deg, #090d1b 0%, #0f172a 50%, #111827 100%);
+      background: #0b0b0b;
       color: #e5e7eb;
       min-height: 100dvh;
       padding: clamp(10px, 1.6vh, 14px);
@@ -33,7 +30,7 @@
       padding: 8px 12px;
       border-radius: 14px;
       border: 1px solid rgba(148, 163, 184, 0.24);
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(20, 20, 20, 0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
@@ -50,7 +47,7 @@
     .panel {
       border-radius: 16px;
       border: 1px solid rgba(148, 163, 184, 0.22);
-      background: rgba(15, 23, 42, 0.78);
+      background: rgba(20, 20, 20, 0.92);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       padding: clamp(10px, 1.6vh, 14px);
@@ -63,7 +60,7 @@
     .team-card {
       border: 1px solid rgba(148, 163, 184, 0.22);
       border-radius: 14px;
-      background: rgba(2, 6, 23, 0.58);
+      background: rgba(10, 10, 10, 0.82);
       padding: clamp(8px, 1.2vh, 10px);
       display: grid;
       gap: 8px;
@@ -91,8 +88,8 @@
     }
     input:focus {
       outline: none;
-      border-color: #60a5fa;
-      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
+      border-color: #d1d5db;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
     }
     .score-row {
       display: grid;
@@ -135,19 +132,19 @@
       white-space: nowrap;
     }
     .btn-primary {
-      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      background: #e5e7eb;
       color: #fff;
     }
     .btn-secondary {
       background: rgba(30, 41, 59, 0.92);
       border-color: rgba(148, 163, 184, 0.3);
-      color: #e2e8f0;
+      color: #e5e7eb;
     }
     .danger {
       margin-top: 6px;
-      background: rgba(127, 29, 29, 0.35);
-      border-color: rgba(248, 113, 113, 0.4);
-      color: #fecaca;
+      background: rgba(60, 60, 60, 0.75);
+      border-color: rgba(255, 255, 255, 0.24);
+      color: #f5f5f5;
       width: 100%;
     }
     .toast {
@@ -221,20 +218,12 @@
       <div class="teams-grid">
         <div class="team-card">
           <div class="field">
-            <label>Player 1A</label>
+            <label>Player</label>
             <input type="text" id="p1a" value="Player" placeholder="Player">
           </div>
           <div class="field">
-            <label>Player 1B</label>
-            <input type="text" id="p1b" value="Player" placeholder="Player">
-          </div>
-          <div class="field">
-            <label>Fargo 1A</label>
+            <label>Fargo</label>
             <input type="text" id="fargo1a" value="" placeholder="---">
-          </div>
-          <div class="field">
-            <label>Fargo 1B</label>
-            <input type="text" id="fargo1b" value="" placeholder="---">
           </div>
           <div class="field">
             <label>Race To (Left)</label>
@@ -252,20 +241,12 @@
 
         <div class="team-card">
           <div class="field">
-            <label>Player 2A</label>
+            <label>Player</label>
             <input type="text" id="p2a" value="Player" placeholder="Player">
           </div>
           <div class="field">
-            <label>Player 2B</label>
-            <input type="text" id="p2b" value="Player" placeholder="Player">
-          </div>
-          <div class="field">
-            <label>Fargo 2A</label>
+            <label>Fargo</label>
             <input type="text" id="fargo2a" value="" placeholder="---">
-          </div>
-          <div class="field">
-            <label>Fargo 2B</label>
-            <input type="text" id="fargo2b" value="" placeholder="---">
           </div>
           <div class="field">
             <label>Race To (Right)</label>
@@ -333,7 +314,7 @@
     var ALLOW_ANONYMOUS_WEB = true;
     var authToken = (window.__scorecastAuthToken || query.get('token') || '').toString().trim();
     var verifyUrl = (window.__scorecastVerifyUrl || query.get('verify') || '').toString().trim();
-    var CONTROL_IDS = ['p1a', 'p1b', 'p2a', 'p2b', 'fargo1a', 'fargo1b', 'fargo2a', 'fargo2b', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
+    var CONTROL_IDS = ['p1a', 'p2a', 'fargo1a', 'fargo2a', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
     function setAuthStatus(text, state) {
       var el = document.getElementById('authStatus');
       if (!el) return;
@@ -428,13 +409,9 @@
     function getState() {
       return {
         p1a: document.getElementById('p1a').value || 'Player',
-        p1b: document.getElementById('p1b').value || 'Player',
         p2a: document.getElementById('p2a').value || 'Player',
-        p2b: document.getElementById('p2b').value || 'Player',
         fargo1a: document.getElementById('fargo1a').value || '',
-        fargo1b: document.getElementById('fargo1b').value || '',
         fargo2a: document.getElementById('fargo2a').value || '',
-        fargo2b: document.getElementById('fargo2b').value || '',
         showRace: document.getElementById('showRace').checked ? '1' : '0',
         showFargo: document.getElementById('showFargo').checked ? '1' : '0',
         raceTo1: document.getElementById('raceTo1').value || '-',
@@ -455,13 +432,9 @@
       var params = new URLSearchParams();
       var s = getState();
       params.set('p1a', s.p1a);
-      params.set('p1b', s.p1b);
       params.set('p2a', s.p2a);
-      params.set('p2b', s.p2b);
       params.set('fargo1a', s.fargo1a);
-      params.set('fargo1b', s.fargo1b);
       params.set('fargo2a', s.fargo2a);
-      params.set('fargo2b', s.fargo2b);
       params.set('showRace', s.showRace);
       params.set('showFargo', s.showFargo);
       params.set('raceTo1', s.raceTo1);
@@ -503,7 +476,7 @@
         return false;
       }
     }
-    var ids = ['p1a', 'p1b', 'p2a', 'p2b', 'fargo1a', 'fargo1b', 'fargo2a', 'fargo2b', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2'];
+    var ids = ['p1a', 'p2a', 'fargo1a', 'fargo2a', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2'];
     function getRoomUrl() {
       var dbUrl = document.getElementById('firebaseUrl').value.trim();
       var roomId = document.getElementById('roomId').value.trim();
@@ -652,13 +625,9 @@
       } catch (e) {}
     }
     document.getElementById('p1a').addEventListener('input', function() { markLocalEdit('p1a'); updateUrlBox(); schedulePushField('p1a'); });
-    document.getElementById('p1b').addEventListener('input', function() { markLocalEdit('p1b'); updateUrlBox(); schedulePushField('p1b'); });
     document.getElementById('p2a').addEventListener('input', function() { markLocalEdit('p2a'); updateUrlBox(); schedulePushField('p2a'); });
-    document.getElementById('p2b').addEventListener('input', function() { markLocalEdit('p2b'); updateUrlBox(); schedulePushField('p2b'); });
     document.getElementById('fargo1a').addEventListener('input', function() { markLocalEdit('fargo1a'); updateUrlBox(); schedulePushField('fargo1a'); });
-    document.getElementById('fargo1b').addEventListener('input', function() { markLocalEdit('fargo1b'); updateUrlBox(); schedulePushField('fargo1b'); });
     document.getElementById('fargo2a').addEventListener('input', function() { markLocalEdit('fargo2a'); updateUrlBox(); schedulePushField('fargo2a'); });
-    document.getElementById('fargo2b').addEventListener('input', function() { markLocalEdit('fargo2b'); updateUrlBox(); schedulePushField('fargo2b'); });
     document.getElementById('showRace').addEventListener('change', function() { markLocalEdit('showRace'); updateUrlBox(); schedulePushField('showRace'); });
     document.getElementById('showFargo').addEventListener('change', function() { markLocalEdit('showFargo'); updateUrlBox(); schedulePushField('showFargo'); });
     document.getElementById('raceTo1').addEventListener('input', function() { markLocalEdit('raceTo1'); updateUrlBox(); schedulePushField('raceTo1'); });
@@ -701,13 +670,9 @@
     document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
     document.getElementById('resetBtn').addEventListener('click', function() {
       document.getElementById('p1a').value = 'Player';
-      document.getElementById('p1b').value = 'Player';
       document.getElementById('p2a').value = 'Player';
-      document.getElementById('p2b').value = 'Player';
       document.getElementById('fargo1a').value = '';
-      document.getElementById('fargo1b').value = '';
       document.getElementById('fargo2a').value = '';
-      document.getElementById('fargo2b').value = '';
       document.getElementById('showRace').checked = true;
       document.getElementById('showFargo').checked = false;
       document.getElementById('raceTo1').value = '-';
