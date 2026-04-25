@@ -292,6 +292,7 @@
     var LOCAL_EDIT_GRACE_MS = 1800;
     var lastEditedAt = {};
     var isAuthorized = false;
+    var ALLOW_ANONYMOUS_WEB = true;
     var authToken = (window.__scorecastAuthToken || query.get('token') || '').toString().trim();
     var verifyUrl = (window.__scorecastVerifyUrl || query.get('verify') || '').toString().trim();
     var CONTROL_IDS = ['team1', 'team2', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
@@ -327,6 +328,18 @@
       if (firebaseField) firebaseField.style.display = 'none';
     }
     function verifyAccess() {
+      if (ALLOW_ANONYMOUS_WEB) {
+        isAuthorized = true;
+        setControlsEnabled(true);
+        setAuthStatus('Web mode enabled. No sign-in required.', 'ok');
+        applyForcedLiveSettings();
+        saveLiveSettings();
+        updateUrlBox();
+        loadFromFirebase();
+        startSync();
+        return Promise.resolve(true);
+      }
+
       if (!verifyUrl || !authToken) {
         setAuthStatus('Sign in through the Scorecast app to use this control page.', 'error');
         setControlsEnabled(false);
