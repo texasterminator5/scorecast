@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoreboard Control</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #eee;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .container {
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      color: #fff;
+    }
+    .row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .field {
+      flex: 1;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 1rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+    }
+    input:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+    .btn-primary {
+      background: #6366f1;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.15);
+      color: #fff;
+    }
+    .score-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .score-row input { flex: 1; min-width: 0; text-align: center; }
+    .score-row .btn-inc {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      line-height: 1;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.25);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .score-row .btn-inc:hover { background: rgba(255,255,255,0.3); }
+    .url-box {
+      margin-top: 20px;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      font-size: 0.75rem;
+      word-break: break-all;
+      color: rgba(255,255,255,0.8);
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background: #22c55e;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+    .auth-status {
+      margin: -8px 0 16px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.85);
+    }
+    .auth-status[data-state="error"] {
+      border-color: rgba(220, 38, 38, 0.7);
+      background: rgba(127, 29, 29, 0.25);
+      color: #fecaca;
+    }
+    .auth-status[data-state="ok"] {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: rgba(20, 83, 45, 0.25);
+      color: #bbf7d0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Scoreboard overlay control</h1>
+    <div class="auth-status" id="authStatus" data-state="checking">Checking access...</div>
+    <div class="field">
+      <label>Team 1 name</label>
+      <input type="text" id="team1" value="Richard Cranium" placeholder="Richard Cranium">
+    </div>
+    <div class="field" style="margin-top: 12px;">
+      <label>Team 2 name</label>
+      <input type="text" id="team2" value="Team 2" placeholder="Team 2">
+    </div>
+    <div class="row" style="margin-top: 12px;">
+      <div class="field">
+        <label>Race to (Team 1)</label>
+        <input type="number" id="raceTo1" value="13" min="1" max="99" placeholder="13">
+      </div>
+      <div class="field">
+        <label>Race to (Team 2)</label>
+        <input type="number" id="raceTo2" value="13" min="1" max="99" placeholder="13">
+      </div>
+    </div>
+    <div class="row" style="margin-top: 12px;">
+      <div class="field">
+        <label>Score 1</label>
+        <div class="score-row">
+          <button type="button" class="btn-inc" id="s1Down" aria-label="Decrease">−</button>
+          <input type="number" id="s1" value="0" min="0" max="999">
+          <button type="button" class="btn-inc" id="s1Up" aria-label="Increase">+</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Score 2</label>
+        <div class="score-row">
+          <button type="button" class="btn-inc" id="s2Down" aria-label="Decrease">−</button>
+          <input type="number" id="s2" value="0" min="0" max="999">
+          <button type="button" class="btn-inc" id="s2Up" aria-label="Increase">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="live-section" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15);">
+      <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+        <input type="checkbox" id="liveMode" style="width: auto;">
+        <span>Live update (overlay auto-updates)</span>
+      </label>
+      <div class="field" id="firebaseField" style="margin-bottom: 10px;">
+        <label>Firebase Database URL</label>
+        <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com">
+      </div>
+      <div class="field">
+        <label>Room ID (share this with the overlay URL)</label>
+        <input type="text" id="roomId" placeholder="e.g. pool-match-1">
+      </div>
+      <p style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 8px;">Paste your Firebase Realtime Database URL and a room ID. The overlay will refresh every 2 seconds.</p>
+    </div>
+    <button class="btn btn-primary" id="copyUrl">Copy overlay URL</button>
+    <button class="btn btn-secondary" id="openUrl">Open overlay (preview)</button>
+    <button class="btn btn-secondary" id="resetBtn" style="margin-top: 12px; background: rgba(220,80,80,0.4);">Reset fields</button>
+    <div class="url-box" id="urlBox"></div>
+  </div>
+  <div class="toast" id="toast">URL copied to clipboard</div>
+  <script>
+    var LIVE_STORAGE = 'pool-overlay-live';
+    var query = new URLSearchParams(location.search);
+    var forcedDbUrl = query.get('db') ? decodeURIComponent(query.get('db')) : '';
+    var forcedRoomId = query.get('room') ? decodeURIComponent(query.get('room')) : '';
+    var forcedLive = (query.get('live') || '').toLowerCase() === '1' || (query.get('live') || '').toLowerCase() === 'true' || (!!forcedDbUrl && !!forcedRoomId);
+    var lockRoom = (query.get('lockRoom') || '').toLowerCase() === '1' || (query.get('lockRoom') || '').toLowerCase() === 'true';
+    var ALWAYS_LIVE = true;
+    var LOCAL_EDIT_GRACE_MS = 1800;
+    var lastEditedAt = {};
+    var isAuthorized = false;
+    var authToken = (window.__scorecastAuthToken || query.get('token') || '').toString().trim();
+    var verifyUrl = (window.__scorecastVerifyUrl || query.get('verify') || '').toString().trim();
+    var CONTROL_IDS = ['team1', 'team2', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'copyUrl', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
+    function setAuthStatus(text, state) {
+      var el = document.getElementById('authStatus');
+      if (!el) return;
+      el.textContent = text;
+      el.setAttribute('data-state', state || 'checking');
+    }
+    function setControlsEnabled(enabled) {
+      CONTROL_IDS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (enabled) el.removeAttribute('disabled');
+        else el.setAttribute('disabled', 'disabled');
+      });
+    }
+    function canSyncLiveData() {
+      return isAuthorized && document.getElementById('liveMode').checked;
+    }
+    function applyForcedLiveSettings() {
+      if (forcedDbUrl) document.getElementById('firebaseUrl').value = forcedDbUrl;
+      if (forcedRoomId) document.getElementById('roomId').value = forcedRoomId;
+      if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').checked = true;
+      if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').disabled = true;
+      if (forcedDbUrl) document.getElementById('firebaseUrl').setAttribute('readonly', 'readonly');
+      if (lockRoom && forcedRoomId) document.getElementById('roomId').setAttribute('readonly', 'readonly');
+
+      // Live mode is now always on for app users, so hide controls that are no longer needed.
+      var liveToggleRow = document.getElementById('liveMode').closest('label');
+      if (liveToggleRow) liveToggleRow.style.display = 'none';
+      var firebaseField = document.getElementById('firebaseField');
+      if (firebaseField) firebaseField.style.display = 'none';
+    }
+    function verifyAccess() {
+      if (!verifyUrl || !authToken) {
+        setAuthStatus('Sign in through the Scorecast app to use this control page.', 'error');
+        setControlsEnabled(false);
+        return Promise.resolve(false);
+      }
+      setAuthStatus('Checking access...', 'checking');
+      return fetch(verifyUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          requestedRoomId: document.getElementById('roomId').value.trim() || null
+        })
+      })
+        .then(function(r) {
+          return r.json().catch(function() { return null; }).then(function(data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function(result) {
+          if (!result.ok || !result.data || !result.data.allowed) {
+            throw new Error((result.data && result.data.error) || 'Unauthorized');
+          }
+          isAuthorized = true;
+          if (result.data.roomId) {
+            forcedRoomId = String(result.data.roomId);
+            document.getElementById('roomId').value = forcedRoomId;
+          }
+          setControlsEnabled(true);
+          setAuthStatus('Authenticated. Live updates are active.', 'ok');
+          applyForcedLiveSettings();
+          saveLiveSettings();
+          updateUrlBox();
+          loadFromFirebase();
+          startSync();
+          return true;
+        })
+        .catch(function() {
+          isAuthorized = false;
+          setControlsEnabled(false);
+          setAuthStatus('Access denied. Please open this page from the Scorecast app.', 'error');
+          stopSync();
+          return false;
+        });
+    }
+    function getState() {
+      return {
+        team1: document.getElementById('team1').value || 'Richard Cranium',
+        team2: document.getElementById('team2').value || 'Team 2',
+        raceTo1: document.getElementById('raceTo1').value || '13',
+        raceTo2: document.getElementById('raceTo2').value || '13',
+        s1: document.getElementById('s1').value || '0',
+        s2: document.getElementById('s2').value || '0'
+      };
+    }
+    function buildUrl() {
+      var path = location.pathname.replace(/\/?control\.html$/, '') || '/';
+      var base = location.origin + (path.endsWith('/') ? path : path + '/') + 'index.html';
+      var liveMode = document.getElementById('liveMode').checked;
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (liveMode && dbUrl && roomId) {
+        return base + '?room=' + encodeURIComponent(roomId) + '&db=' + encodeURIComponent(dbUrl);
+      }
+      var params = new URLSearchParams();
+      var s = getState();
+      params.set('team1', s.team1);
+      params.set('team2', s.team2);
+      params.set('raceTo1', s.raceTo1);
+      params.set('raceTo2', s.raceTo2);
+      params.set('s1', s.s1);
+      params.set('s2', s.s2);
+      return base + (base.includes('?') ? '&' : '?') + params.toString();
+    }
+    function updateUrlBox() {
+      document.getElementById('urlBox').textContent = 'Overlay URL: ' + buildUrl();
+    }
+    function showToast(message, isError) {
+      var t = document.getElementById('toast');
+      t.textContent = message;
+      t.style.background = isError ? '#dc2626' : '#22c55e';
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2200);
+    }
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(function() { return true; }).catch(function() { return false; });
+      }
+      return Promise.resolve(false);
+    }
+    function legacyCopyText(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', 'readonly');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        ta.style.pointerEvents = 'none';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return !!ok;
+      } catch (e) {
+        return false;
+      }
+    }
+    var ids = ['team1', 'team2', 'raceTo1', 'raceTo2', 's1', 's2'];
+    function getRoomUrl() {
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (!dbUrl || !roomId) return '';
+      return dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(roomId) + '.json';
+    }
+    function pushToFirebase() {
+      if (!canSyncLiveData()) return;
+      var url = getRoomUrl();
+      if (!url) return;
+      fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify(getState()),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function() {});
+    }
+    function patchFieldToFirebase(id, value) {
+      if (!canSyncLiveData()) return;
+      var url = getRoomUrl();
+      if (!url) return;
+      var payload = {};
+      payload[id] = value != null ? value : '';
+      fetch(url, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function() {});
+    }
+    var pushDebounceById = {};
+    function schedulePushField(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      clearTimeout(pushDebounceById[id]);
+      pushDebounceById[id] = setTimeout(function() {
+        patchFieldToFirebase(id, el.value != null ? el.value.trim() : '');
+      }, 400);
+    }
+    var pushDebounce;
+    function schedulePush() {
+      clearTimeout(pushDebounce);
+      pushDebounce = setTimeout(pushToFirebase, 400);
+    }
+    function randomRoomId() {
+      return 'room-' + Math.random().toString(36).slice(2, 10);
+    }
+    function applyStateToForm(data, skipFocused) {
+      var focused = document.activeElement;
+      ids.forEach(function(id) {
+        if (skipFocused && document.getElementById(id) === focused) return;
+        var lastEditMs = lastEditedAt[id] || 0;
+        if (skipFocused && Date.now() - lastEditMs < LOCAL_EDIT_GRACE_MS) return;
+        if (data[id] === undefined) return;
+        var el = document.getElementById(id);
+        if (el) el.value = data[id] != null ? String(data[id]) : '';
+      });
+    }
+    function markLocalEdit(id) {
+      lastEditedAt[id] = Date.now();
+    }
+    function fetchRoom(opts) {
+      opts = opts || {};
+      var url = getRoomUrl();
+      if (!url) return Promise.resolve(null);
+      var cacheBuster = url + (url.indexOf('?') !== -1 ? '&' : '?') + '_=' + Date.now();
+      return fetch(cacheBuster, { cache: 'no-store' }).then(function(r) {
+        return r.ok ? r.json() : null;
+      }).catch(function() { return null; });
+    }
+    function loadFromFirebase() {
+      if (!getRoomUrl() || !canSyncLiveData()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, false);
+        updateUrlBox();
+      });
+    }
+    var syncInterval;
+    function startSync() {
+      clearInterval(syncInterval);
+      if (!canSyncLiveData() || !getRoomUrl()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, true);
+      });
+      syncInterval = setInterval(function() {
+        fetchRoom().then(function(data) {
+          if (data) applyStateToForm(data, true);
+        });
+      }, 2000);
+    }
+    function stopSync() {
+      clearInterval(syncInterval);
+      syncInterval = null;
+    }
+    function runSyncOnce() {
+      if (!canSyncLiveData() || !getRoomUrl()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, true);
+      });
+    }
+    var syncStartDebounce;
+    function maybeStartSync() {
+      clearTimeout(syncStartDebounce);
+      syncStartDebounce = setTimeout(function() {
+        if (document.getElementById('liveMode').checked && getRoomUrl()) {
+          loadFromFirebase();
+          startSync();
+        } else stopSync();
+      }, 400);
+    }
+    (function loadSaved() {
+      try {
+        var s = localStorage.getItem(LIVE_STORAGE);
+        if (s) {
+          var d = JSON.parse(s);
+          if (d.firebaseUrl) document.getElementById('firebaseUrl').value = d.firebaseUrl;
+          if (d.roomId) document.getElementById('roomId').value = d.roomId;
+          else document.getElementById('roomId').value = randomRoomId();
+          if (d.liveMode) document.getElementById('liveMode').checked = true;
+        } else {
+          document.getElementById('roomId').value = randomRoomId();
+        }
+        if (document.getElementById('liveMode').checked && getRoomUrl()) {
+          loadFromFirebase();
+          startSync();
+        }
+      } catch (e) {}
+      applyForcedLiveSettings();
+      saveLiveSettings();
+      setControlsEnabled(false);
+      verifyAccess();
+    })();
+    function saveLiveSettings() {
+      try {
+        localStorage.setItem(LIVE_STORAGE, JSON.stringify({
+          firebaseUrl: document.getElementById('firebaseUrl').value.trim(),
+          roomId: document.getElementById('roomId').value.trim(),
+          liveMode: document.getElementById('liveMode').checked
+        }));
+      } catch (e) {}
+    }
+    document.getElementById('team1').addEventListener('input', function() { markLocalEdit('team1'); updateUrlBox(); schedulePushField('team1'); });
+    document.getElementById('team2').addEventListener('input', function() { markLocalEdit('team2'); updateUrlBox(); schedulePushField('team2'); });
+    document.getElementById('raceTo1').addEventListener('input', function() { markLocalEdit('raceTo1'); updateUrlBox(); schedulePushField('raceTo1'); });
+    document.getElementById('raceTo2').addEventListener('input', function() { markLocalEdit('raceTo2'); updateUrlBox(); schedulePushField('raceTo2'); });
+    document.getElementById('s1').addEventListener('input', function() { markLocalEdit('s1'); updateUrlBox(); schedulePushField('s1'); });
+    document.getElementById('s2').addEventListener('input', function() { markLocalEdit('s2'); updateUrlBox(); schedulePushField('s2'); });
+    document.getElementById('firebaseUrl').addEventListener('input', maybeStartSync);
+    document.getElementById('firebaseUrl').addEventListener('change', function() {
+      saveLiveSettings();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.getElementById('roomId').addEventListener('input', maybeStartSync);
+    document.getElementById('roomId').addEventListener('change', function() {
+      saveLiveSettings();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.getElementById('liveMode').addEventListener('change', function() {
+      saveLiveSettings();
+      updateUrlBox();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') runSyncOnce();
+    });
+    document.getElementById('copyUrl').addEventListener('click', function() {
+      var url = buildUrl();
+      copyText(url).then(function(ok) {
+        if (!ok) ok = legacyCopyText(url);
+        if (ok) {
+          showToast('Overlay URL copied');
+          return;
+        }
+        document.getElementById('urlBox').textContent = 'Copy this URL: ' + url;
+        showToast('Copy failed - URL shown below', true);
+      });
+    });
+    document.getElementById('openUrl').addEventListener('click', function() {
+      window.open(buildUrl(), '_blank');
+    });
+    function changeScore(id, delta) {
+      var el = document.getElementById(id);
+      var n = parseInt(el.value, 10) || 0;
+      n = Math.max(0, Math.min(999, n + delta));
+      el.value = n;
+      markLocalEdit(id);
+      updateUrlBox();
+      schedulePushField(id);
+    }
+    document.getElementById('s1Up').addEventListener('click', function() { changeScore('s1', 1); });
+    document.getElementById('s1Down').addEventListener('click', function() { changeScore('s1', -1); });
+    document.getElementById('s2Up').addEventListener('click', function() { changeScore('s2', 1); });
+    document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      document.getElementById('team1').value = 'Richard Cranium';
+      document.getElementById('team2').value = 'Team 2';
+      document.getElementById('raceTo1').value = '13';
+      document.getElementById('raceTo2').value = '13';
+      document.getElementById('s1').value = '0';
+      document.getElementById('s2').value = '0';
+      updateUrlBox();
+      schedulePush();
+      showToast('Fields reset');
+    });
+    updateUrlBox();
+  </script>
+</body>
+</html>

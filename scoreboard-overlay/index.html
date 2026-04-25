@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1920, height=1080, initial-scale=1">
+  <title>Scoreboard Overlay</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: transparent;
+      position: relative;
+    }
+    .scale-root {
+      width: 1920px;
+      height: 1080px;
+      transform-origin: center center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wrap {
+      position: relative;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      width: 800px;
+      min-height: 56px;
+      padding: 10px 32px;
+      background: linear-gradient(90deg, #7c3aed 0%, #06b6d4 100%);
+      border-radius: 8px;
+    }
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4%;
+      min-width: 0;
+      flex: 1;
+    }
+    .left-group, .right-group {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4%;
+      min-width: 0;
+      flex: 1;
+    }
+    .left-group { flex: 1; min-width: 0; justify-content: flex-start; }
+    .right-group { flex: 1; min-width: 0; justify-content: flex-end; flex-direction: row; }
+    .scores-center {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+    .score-block {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-shrink: 0;
+      background: rgba(0,0,0,0.25);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 4px 16px;
+      border-radius: 5px;
+    }
+    .race-to { font-size: 15px; font-weight: 600; color: rgba(255,255,255,0.9); text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
+    .name { font-size: 22px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+    .score { font-size: 51px; font-weight: 800; color: #fff; line-height: 1; flex-shrink: 0; text-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+  </style>
+</head>
+<body>
+  <div class="scale-root" id="scaleRoot">
+  <div class="wrap">
+    <div class="row">
+      <div class="left-group">
+        <span class="name" id="team1">Team 1</span>
+      </div>
+      <div class="scores-center">
+        <div class="score-block">
+          <span class="race-to" id="raceToLabel">Race to 13</span>
+          <span class="score" id="score1">0</span>
+        </div>
+        <div class="score-block">
+          <span class="race-to" id="raceToLabel2">Race to 13</span>
+          <span class="score" id="score2">0</span>
+        </div>
+      </div>
+      <div class="right-group">
+        <span class="name" id="team2">Team 2</span>
+      </div>
+    </div>
+  </div>
+  </div>
+  <script>
+    (function() {
+      var DESIGN_W = 1920, DESIGN_H = 1080;
+      function applyScale() {
+        var w = window.innerWidth, h = window.innerHeight;
+        var scaleFit = Math.max(w / DESIGN_W, h / DESIGN_H);
+        var scale = Math.max(1, scaleFit);
+        var el = document.getElementById('scaleRoot');
+        if (el) el.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
+      }
+      var root = document.getElementById('scaleRoot');
+      if (root) {
+        root.style.position = 'absolute';
+        root.style.left = '50%';
+        root.style.top = '50%';
+      }
+      applyScale();
+      window.addEventListener('resize', applyScale);
+
+      var params = new URLSearchParams(window.location.search);
+      var room = params.get('room');
+      var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
+
+      function applyState(data) {
+        var d = data || {};
+        var team1 = (d.team1 != null ? d.team1 : 'Team 1').toString();
+        var team2 = (d.team2 != null ? d.team2 : 'Team 2').toString();
+        var s1 = (d.s1 != null ? d.s1 : 0).toString();
+        var s2 = (d.s2 != null ? d.s2 : 0).toString();
+        var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : 13).toString();
+        var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : 13).toString();
+        document.getElementById('raceToLabel').textContent = 'Race to ' + raceTo1;
+        document.getElementById('raceToLabel2').textContent = 'Race to ' + raceTo2;
+        document.getElementById('team1').textContent = team1;
+        document.getElementById('team2').textContent = team2;
+        document.getElementById('score1').textContent = s1;
+        document.getElementById('score2').textContent = s2;
+      }
+
+      if (room && dbUrl) {
+        var url = dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(room) + '.json';
+        function poll() {
+          fetch(url).then(function(r) { return r.json(); }).then(applyState).catch(function() {});
+        }
+        poll();
+        setInterval(poll, 2000);
+      } else {
+        var t1 = params.get('team1');
+        var t2 = params.get('team2');
+        applyState({
+          team1: t1 ? decodeURIComponent(t1) : 'Team 1',
+          team2: t2 ? decodeURIComponent(t2) : 'Team 2',
+          s1: params.get('s1') || '0',
+          s2: params.get('s2') || '0',
+          raceTo1: params.get('raceTo1') || params.get('raceTo') || '13',
+          raceTo2: params.get('raceTo2') || params.get('raceTo') || '13'
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
