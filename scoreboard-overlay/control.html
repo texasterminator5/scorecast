@@ -6,98 +6,160 @@
   <title>Scoreboard Control</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      color: #eee;
-      min-height: 100vh;
-      padding: 24px;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background:
+        radial-gradient(1200px 600px at 15% -10%, rgba(99,102,241,0.35), transparent 60%),
+        radial-gradient(900px 500px at 85% 0%, rgba(6,182,212,0.2), transparent 60%),
+        linear-gradient(160deg, #090d1b 0%, #0f172a 50%, #111827 100%);
+      color: #e5e7eb;
+      min-height: 100dvh;
+      padding: clamp(12px, 2.2vh, 20px);
+      overflow-x: hidden;
     }
     .container {
-      max-width: 420px;
+      width: min(980px, 100%);
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 1.8vh, 14px);
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
     }
     h1 {
-      font-size: 1.5rem;
-      margin-bottom: 24px;
+      font-size: clamp(1rem, 2.2vw, 1.28rem);
       color: #fff;
+      letter-spacing: 0.01em;
+      font-weight: 700;
     }
-    .row {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
+    .subtitle {
+      color: #94a3b8;
+      font-size: clamp(0.72rem, 1.8vw, 0.84rem);
     }
-    .field {
-      flex: 1;
+    .panel {
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(15, 23, 42, 0.78);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: clamp(12px, 2.2vh, 18px);
     }
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(10px, 1.8vh, 14px);
+    }
+    .team-card {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 14px;
+      background: rgba(2, 6, 23, 0.58);
+      padding: clamp(10px, 1.8vh, 14px);
+      display: grid;
+      gap: 10px;
+    }
+    .field { min-width: 0; }
     label {
       display: block;
-      font-size: 0.8rem;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 4px;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
     }
     input {
       width: 100%;
-      padding: 12px 14px;
-      font-size: 1rem;
-      border: 1px solid rgba(255,255,255,0.2);
-      border-radius: 8px;
-      background: rgba(255,255,255,0.08);
-      color: #fff;
+      height: clamp(40px, 6.4vh, 48px);
+      padding: 0 12px;
+      font-size: clamp(0.92rem, 2.4vw, 1rem);
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.92);
+      color: #f8fafc;
     }
     input:focus {
       outline: none;
-      border-color: #6366f1;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-top: 8px;
-    }
-    .btn-primary {
-      background: #6366f1;
-      color: #fff;
-      margin-bottom: 10px;
-    }
-    .btn-secondary {
-      background: rgba(255,255,255,0.15);
-      color: #fff;
+      border-color: #60a5fa;
+      box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.2);
     }
     .score-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: clamp(42px, 8vw, 48px) 1fr clamp(42px, 8vw, 48px);
       align-items: center;
       gap: 8px;
     }
-    .score-row input { flex: 1; min-width: 0; text-align: center; }
-    .score-row .btn-inc {
-      width: 44px;
-      height: 44px;
-      padding: 0;
-      font-size: 1.4rem;
+    .score-row input {
+      text-align: center;
+      font-size: clamp(1.05rem, 2.6vw, 1.18rem);
       font-weight: 700;
-      line-height: 1;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.2);
-      color: #fff;
-      border: 1px solid rgba(255,255,255,0.25);
-      cursor: pointer;
-      flex-shrink: 0;
     }
-    .score-row .btn-inc:hover { background: rgba(255,255,255,0.3); }
+    .score-row .btn-inc {
+      height: clamp(42px, 6.8vh, 48px);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      background: rgba(30, 41, 59, 0.9);
+      color: #e2e8f0;
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .score-row .btn-inc:hover { background: rgba(51, 65, 85, 0.95); }
+    .meta-grid {
+      margin-top: clamp(10px, 1.8vh, 14px);
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .btn {
+      height: clamp(40px, 6.4vh, 46px);
+      padding: 0 14px;
+      font-size: clamp(0.88rem, 2.1vw, 0.96rem);
+      font-weight: 650;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #0ea5e9);
+      color: #fff;
+    }
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.92);
+      border-color: rgba(148, 163, 184, 0.3);
+      color: #e2e8f0;
+    }
+    .danger {
+      margin-top: 8px;
+      background: rgba(127, 29, 29, 0.35);
+      border-color: rgba(248, 113, 113, 0.4);
+      color: #fecaca;
+      width: 100%;
+    }
     .url-box {
-      margin-top: 20px;
-      padding: 12px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      font-size: 0.75rem;
+      margin-top: 4px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(15, 23, 42, 0.65);
+      font-size: 0.76rem;
       word-break: break-all;
-      color: rgba(255,255,255,0.8);
+      color: #cbd5e1;
+      max-height: 84px;
+      overflow: auto;
     }
     .toast {
       position: fixed;
@@ -133,67 +195,100 @@
       background: rgba(20, 83, 45, 0.25);
       color: #bbf7d0;
     }
+    @media (max-width: 780px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .auth-status {
+        width: 100%;
+      }
+      .teams-grid {
+        grid-template-columns: 1fr;
+      }
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Scoreboard overlay control</h1>
-    <div class="auth-status" id="authStatus" data-state="checking">Checking access...</div>
-    <div class="field">
-      <label>Team 1 name</label>
-      <input type="text" id="team1" value="Richard Cranium" placeholder="Richard Cranium">
-    </div>
-    <div class="field" style="margin-top: 12px;">
-      <label>Team 2 name</label>
-      <input type="text" id="team2" value="Team 2" placeholder="Team 2">
-    </div>
-    <div class="row" style="margin-top: 12px;">
-      <div class="field">
-        <label>Race to (Team 1)</label>
-        <input type="number" id="raceTo1" value="13" min="1" max="99" placeholder="13">
+    <div class="topbar">
+      <div>
+        <h1>Scorecast Control</h1>
+        <p class="subtitle">Fast score updates with live overlay sync</p>
       </div>
-      <div class="field">
-        <label>Race to (Team 2)</label>
-        <input type="number" id="raceTo2" value="13" min="1" max="99" placeholder="13">
-      </div>
+      <div class="auth-status" id="authStatus" data-state="checking">Checking access...</div>
     </div>
-    <div class="row" style="margin-top: 12px;">
-      <div class="field">
-        <label>Score 1</label>
-        <div class="score-row">
-          <button type="button" class="btn-inc" id="s1Down" aria-label="Decrease">−</button>
-          <input type="number" id="s1" value="0" min="0" max="999">
-          <button type="button" class="btn-inc" id="s1Up" aria-label="Increase">+</button>
+
+    <div class="panel">
+      <div class="teams-grid">
+        <div class="team-card">
+          <div class="field">
+            <label>Team 1</label>
+            <input type="text" id="team1" value="Richard Cranium" placeholder="Team 1 name">
+          </div>
+          <div class="field">
+            <label>Race To</label>
+            <input type="number" id="raceTo1" value="13" min="1" max="99" placeholder="13">
+          </div>
+          <div class="field">
+            <label>Score</label>
+            <div class="score-row">
+              <button type="button" class="btn-inc" id="s1Down" aria-label="Decrease Team 1 Score">−</button>
+              <input type="number" id="s1" value="0" min="0" max="999">
+              <button type="button" class="btn-inc" id="s1Up" aria-label="Increase Team 1 Score">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="field">
+            <label>Team 2</label>
+            <input type="text" id="team2" value="Team 2" placeholder="Team 2 name">
+          </div>
+          <div class="field">
+            <label>Race To</label>
+            <input type="number" id="raceTo2" value="13" min="1" max="99" placeholder="13">
+          </div>
+          <div class="field">
+            <label>Score</label>
+            <div class="score-row">
+              <button type="button" class="btn-inc" id="s2Down" aria-label="Decrease Team 2 Score">−</button>
+              <input type="number" id="s2" value="0" min="0" max="999">
+              <button type="button" class="btn-inc" id="s2Up" aria-label="Increase Team 2 Score">+</button>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="field">
-        <label>Score 2</label>
-        <div class="score-row">
-          <button type="button" class="btn-inc" id="s2Down" aria-label="Decrease">−</button>
-          <input type="number" id="s2" value="0" min="0" max="999">
-          <button type="button" class="btn-inc" id="s2Up" aria-label="Increase">+</button>
+
+      <div class="meta-grid">
+        <div class="field">
+          <label>Room ID</label>
+          <input type="text" id="roomId" placeholder="room id" readonly>
+        </div>
+        <button class="btn btn-primary" id="copyUrl">Copy Overlay URL</button>
+        <button class="btn btn-secondary" id="openUrl">Preview Overlay</button>
+      </div>
+
+      <button class="btn btn-secondary danger" id="resetBtn">Reset Scores & Names</button>
+
+      <div class="live-section" style="display:none;">
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+          <input type="checkbox" id="liveMode" style="width: auto;">
+          <span>Live update</span>
+        </label>
+        <div class="field" id="firebaseField" style="margin-bottom: 10px;">
+          <label>Firebase Database URL</label>
+          <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com">
         </div>
       </div>
+      <div class="url-box" id="urlBox"></div>
     </div>
-    <div class="live-section" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.15);">
-      <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
-        <input type="checkbox" id="liveMode" style="width: auto;">
-        <span>Live update (overlay auto-updates)</span>
-      </label>
-      <div class="field" id="firebaseField" style="margin-bottom: 10px;">
-        <label>Firebase Database URL</label>
-        <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com">
-      </div>
-      <div class="field">
-        <label>Room ID (share this with the overlay URL)</label>
-        <input type="text" id="roomId" placeholder="e.g. pool-match-1">
-      </div>
-      <p style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 8px;">Paste your Firebase Realtime Database URL and a room ID. The overlay will refresh every 2 seconds.</p>
-    </div>
-    <button class="btn btn-primary" id="copyUrl">Copy overlay URL</button>
-    <button class="btn btn-secondary" id="openUrl">Open overlay (preview)</button>
-    <button class="btn btn-secondary" id="resetBtn" style="margin-top: 12px; background: rgba(220,80,80,0.4);">Reset fields</button>
-    <div class="url-box" id="urlBox"></div>
   </div>
   <div class="toast" id="toast">URL copied to clipboard</div>
   <script>
