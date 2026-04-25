@@ -221,11 +221,23 @@
       <div class="teams-grid">
         <div class="team-card">
           <div class="field">
-            <label>Player</label>
-            <input type="text" id="team1" value="Player" placeholder="Player">
+            <label>Player 1A</label>
+            <input type="text" id="p1a" value="Player" placeholder="Player">
           </div>
           <div class="field">
-            <label>Race To</label>
+            <label>Player 1B</label>
+            <input type="text" id="p1b" value="Player" placeholder="Player">
+          </div>
+          <div class="field">
+            <label>Fargo 1A</label>
+            <input type="text" id="fargo1a" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Fargo 1B</label>
+            <input type="text" id="fargo1b" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Race To (Left)</label>
             <input type="text" id="raceTo1" value="-" placeholder="-">
           </div>
           <div class="field">
@@ -240,11 +252,23 @@
 
         <div class="team-card">
           <div class="field">
-            <label>Player</label>
-            <input type="text" id="team2" value="Player" placeholder="Player">
+            <label>Player 2A</label>
+            <input type="text" id="p2a" value="Player" placeholder="Player">
           </div>
           <div class="field">
-            <label>Race To</label>
+            <label>Player 2B</label>
+            <input type="text" id="p2b" value="Player" placeholder="Player">
+          </div>
+          <div class="field">
+            <label>Fargo 2A</label>
+            <input type="text" id="fargo2a" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Fargo 2B</label>
+            <input type="text" id="fargo2b" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Race To (Right)</label>
             <input type="text" id="raceTo2" value="-" placeholder="-">
           </div>
           <div class="field">
@@ -264,6 +288,20 @@
           <input type="text" id="roomId" placeholder="room id" readonly>
         </div>
         <button class="btn btn-secondary" id="openUrl">Preview Overlay</button>
+      </div>
+      <div class="meta-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px;">
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:center;gap:8px;text-transform:none;letter-spacing:0;font-size:0.84rem;">
+            <input type="checkbox" id="showRace" checked style="width:18px;height:18px;">
+            Show Race To
+          </label>
+        </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:center;gap:8px;text-transform:none;letter-spacing:0;font-size:0.84rem;">
+            <input type="checkbox" id="showFargo" style="width:18px;height:18px;">
+            Show Fargo
+          </label>
+        </div>
       </div>
 
       <button class="btn btn-secondary danger" id="resetBtn">Reset Scores & Names</button>
@@ -295,7 +333,7 @@
     var ALLOW_ANONYMOUS_WEB = true;
     var authToken = (window.__scorecastAuthToken || query.get('token') || '').toString().trim();
     var verifyUrl = (window.__scorecastVerifyUrl || query.get('verify') || '').toString().trim();
-    var CONTROL_IDS = ['team1', 'team2', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
+    var CONTROL_IDS = ['p1a', 'p1b', 'p2a', 'p2b', 'fargo1a', 'fargo1b', 'fargo2a', 'fargo2b', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
     function setAuthStatus(text, state) {
       var el = document.getElementById('authStatus');
       if (!el) return;
@@ -389,8 +427,16 @@
     }
     function getState() {
       return {
-        team1: document.getElementById('team1').value || 'Player',
-        team2: document.getElementById('team2').value || 'Player',
+        p1a: document.getElementById('p1a').value || 'Player',
+        p1b: document.getElementById('p1b').value || 'Player',
+        p2a: document.getElementById('p2a').value || 'Player',
+        p2b: document.getElementById('p2b').value || 'Player',
+        fargo1a: document.getElementById('fargo1a').value || '',
+        fargo1b: document.getElementById('fargo1b').value || '',
+        fargo2a: document.getElementById('fargo2a').value || '',
+        fargo2b: document.getElementById('fargo2b').value || '',
+        showRace: document.getElementById('showRace').checked ? '1' : '0',
+        showFargo: document.getElementById('showFargo').checked ? '1' : '0',
         raceTo1: document.getElementById('raceTo1').value || '-',
         raceTo2: document.getElementById('raceTo2').value || '-',
         s1: document.getElementById('s1').value || '0',
@@ -408,8 +454,16 @@
       }
       var params = new URLSearchParams();
       var s = getState();
-      params.set('team1', s.team1);
-      params.set('team2', s.team2);
+      params.set('p1a', s.p1a);
+      params.set('p1b', s.p1b);
+      params.set('p2a', s.p2a);
+      params.set('p2b', s.p2b);
+      params.set('fargo1a', s.fargo1a);
+      params.set('fargo1b', s.fargo1b);
+      params.set('fargo2a', s.fargo2a);
+      params.set('fargo2b', s.fargo2b);
+      params.set('showRace', s.showRace);
+      params.set('showFargo', s.showFargo);
       params.set('raceTo1', s.raceTo1);
       params.set('raceTo2', s.raceTo2);
       params.set('s1', s.s1);
@@ -449,7 +503,7 @@
         return false;
       }
     }
-    var ids = ['team1', 'team2', 'raceTo1', 'raceTo2', 's1', 's2'];
+    var ids = ['p1a', 'p1b', 'p2a', 'p2b', 'fargo1a', 'fargo1b', 'fargo2a', 'fargo2b', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2'];
     function getRoomUrl() {
       var dbUrl = document.getElementById('firebaseUrl').value.trim();
       var roomId = document.getElementById('roomId').value.trim();
@@ -484,7 +538,10 @@
       if (!el) return;
       clearTimeout(pushDebounceById[id]);
       pushDebounceById[id] = setTimeout(function() {
-        patchFieldToFirebase(id, el.value != null ? el.value.trim() : '');
+        var value;
+        if (el.type === 'checkbox') value = el.checked ? '1' : '0';
+        else value = el.value != null ? el.value.trim() : '';
+        patchFieldToFirebase(id, value);
       }, 400);
     }
     var pushDebounce;
@@ -503,7 +560,12 @@
         if (skipFocused && Date.now() - lastEditMs < LOCAL_EDIT_GRACE_MS) return;
         if (data[id] === undefined) return;
         var el = document.getElementById(id);
-        if (el) el.value = data[id] != null ? String(data[id]) : '';
+        if (!el) return;
+        if (el.type === 'checkbox') {
+          el.checked = data[id] === true || data[id] === '1' || data[id] === 1 || String(data[id]).toLowerCase() === 'true';
+        } else {
+          el.value = data[id] != null ? String(data[id]) : '';
+        }
       });
     }
     function markLocalEdit(id) {
@@ -589,8 +651,16 @@
         }));
       } catch (e) {}
     }
-    document.getElementById('team1').addEventListener('input', function() { markLocalEdit('team1'); updateUrlBox(); schedulePushField('team1'); });
-    document.getElementById('team2').addEventListener('input', function() { markLocalEdit('team2'); updateUrlBox(); schedulePushField('team2'); });
+    document.getElementById('p1a').addEventListener('input', function() { markLocalEdit('p1a'); updateUrlBox(); schedulePushField('p1a'); });
+    document.getElementById('p1b').addEventListener('input', function() { markLocalEdit('p1b'); updateUrlBox(); schedulePushField('p1b'); });
+    document.getElementById('p2a').addEventListener('input', function() { markLocalEdit('p2a'); updateUrlBox(); schedulePushField('p2a'); });
+    document.getElementById('p2b').addEventListener('input', function() { markLocalEdit('p2b'); updateUrlBox(); schedulePushField('p2b'); });
+    document.getElementById('fargo1a').addEventListener('input', function() { markLocalEdit('fargo1a'); updateUrlBox(); schedulePushField('fargo1a'); });
+    document.getElementById('fargo1b').addEventListener('input', function() { markLocalEdit('fargo1b'); updateUrlBox(); schedulePushField('fargo1b'); });
+    document.getElementById('fargo2a').addEventListener('input', function() { markLocalEdit('fargo2a'); updateUrlBox(); schedulePushField('fargo2a'); });
+    document.getElementById('fargo2b').addEventListener('input', function() { markLocalEdit('fargo2b'); updateUrlBox(); schedulePushField('fargo2b'); });
+    document.getElementById('showRace').addEventListener('change', function() { markLocalEdit('showRace'); updateUrlBox(); schedulePushField('showRace'); });
+    document.getElementById('showFargo').addEventListener('change', function() { markLocalEdit('showFargo'); updateUrlBox(); schedulePushField('showFargo'); });
     document.getElementById('raceTo1').addEventListener('input', function() { markLocalEdit('raceTo1'); updateUrlBox(); schedulePushField('raceTo1'); });
     document.getElementById('raceTo2').addEventListener('input', function() { markLocalEdit('raceTo2'); updateUrlBox(); schedulePushField('raceTo2'); });
     document.getElementById('s1').addEventListener('input', function() { markLocalEdit('s1'); updateUrlBox(); schedulePushField('s1'); });
@@ -630,8 +700,16 @@
     document.getElementById('s2Up').addEventListener('click', function() { changeScore('s2', 1); });
     document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
     document.getElementById('resetBtn').addEventListener('click', function() {
-      document.getElementById('team1').value = 'Player';
-      document.getElementById('team2').value = 'Player';
+      document.getElementById('p1a').value = 'Player';
+      document.getElementById('p1b').value = 'Player';
+      document.getElementById('p2a').value = 'Player';
+      document.getElementById('p2b').value = 'Player';
+      document.getElementById('fargo1a').value = '';
+      document.getElementById('fargo1b').value = '';
+      document.getElementById('fargo2a').value = '';
+      document.getElementById('fargo2b').value = '';
+      document.getElementById('showRace').checked = true;
+      document.getElementById('showFargo').checked = false;
       document.getElementById('raceTo1').value = '-';
       document.getElementById('raceTo2').value = '-';
       document.getElementById('s1').value = '0';
