@@ -222,7 +222,7 @@
         <div class="team-card">
           <div class="field">
             <label>Player</label>
-            <input type="text" id="team1" value="Player 1" placeholder="Player 1">
+            <input type="text" id="team1" value="Player" placeholder="Player">
           </div>
           <div class="field">
             <label>Race To</label>
@@ -241,7 +241,7 @@
         <div class="team-card">
           <div class="field">
             <label>Player</label>
-            <input type="text" id="team2" value="Player 2" placeholder="Player 2">
+            <input type="text" id="team2" value="Player" placeholder="Player">
           </div>
           <div class="field">
             <label>Race To</label>
@@ -376,8 +376,8 @@
     }
     function getState() {
       return {
-        team1: document.getElementById('team1').value || 'Player 1',
-        team2: document.getElementById('team2').value || 'Player 2',
+        team1: document.getElementById('team1').value || 'Player',
+        team2: document.getElementById('team2').value || 'Player',
         raceTo1: document.getElementById('raceTo1').value || '-',
         raceTo2: document.getElementById('raceTo2').value || '-',
         s1: document.getElementById('s1').value || '0',
@@ -617,8 +617,8 @@
     document.getElementById('s2Up').addEventListener('click', function() { changeScore('s2', 1); });
     document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
     document.getElementById('resetBtn').addEventListener('click', function() {
-      document.getElementById('team1').value = 'Player 1';
-      document.getElementById('team2').value = 'Player 2';
+      document.getElementById('team1').value = 'Player';
+      document.getElementById('team2').value = 'Player';
       document.getElementById('raceTo1').value = '-';
       document.getElementById('raceTo2').value = '-';
       document.getElementById('s1').value = '0';
