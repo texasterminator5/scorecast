@@ -31,10 +31,10 @@
       align-items: center;
       justify-content: center;
       gap: 24px;
-      min-height: 170px;
+      min-height: 88px;
     }
     .side {
-      width: 500px;
+      width: 375px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -69,7 +69,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 14px;
-      padding: 12px 14px;
+      padding: 8px 12px;
+      min-height: 64px;
       border-radius: 10px;
       background: #fff;
       border: 2px solid #000;
@@ -78,7 +79,7 @@
       flex-direction: row-reverse;
     }
     .player-name {
-      font-size: 28px;
+      font-size: 24px;
       font-weight: 780;
       color: #000;
       white-space: nowrap;
@@ -92,7 +93,7 @@
     }
     .fargo-chip {
       min-width: 62px;
-      height: 30px;
+      height: 28px;
       padding: 0 9px;
       border-radius: 8px;
       display: inline-flex;
@@ -111,8 +112,9 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      gap: 8px;
+      gap: 0;
       padding: 0;
+      position: relative;
     }
     .center-top { display: none; }
     .scores {
@@ -142,13 +144,13 @@
       text-align: center;
     }
     .score-box {
-      width: 142px;
-      height: 118px;
+      width: 126px;
+      height: 64px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       border-radius: 14px;
-      font-size: 78px;
+      font-size: 48px;
       font-weight: 860;
       line-height: 1;
       color: #000;
@@ -157,10 +159,10 @@
       background: #fff;
     }
     .score-divider {
-      font-size: 44px;
+      font-size: 36px;
       font-weight: 700;
       color: #000;
-      transform: translateY(-3px);
+      transform: translateY(-1px);
     }
     .meta { display: none; }
     .race-center {
@@ -177,6 +179,10 @@
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      position: absolute;
+      left: 50%;
+      top: -52px;
+      transform: translateX(-50%);
     }
     .race-center b {
       font-weight: 800;
@@ -204,6 +210,7 @@
       </div>
       <div class="center">
         <div class="center-top"></div>
+        <div class="race-center" id="raceCenter">Race To <b id="raceCenterValue">-</b></div>
         <div class="scores">
           <div class="score-col">
             <span class="score-race" id="raceScoreLeft">Race -</span>
@@ -215,7 +222,6 @@
             <span class="score-box" id="score2">0</span>
           </div>
         </div>
-        <div class="race-center" id="raceCenter">Race To <b id="raceCenterValue">-</b></div>
         <div class="meta" id="fargoMeta"></div>
       </div>
       <div class="side right">
@@ -283,16 +289,12 @@
         document.getElementById('p2aName').textContent = p2a;
         document.getElementById('fargo1a').textContent = f1a || '---';
         document.getElementById('fargo2a').textContent = f2a || '---';
-        document.getElementById('raceLeft').textContent = 'Race ' + raceTo1;
-        document.getElementById('raceRight').textContent = 'Race ' + raceTo2;
         document.getElementById('raceScoreLeft').textContent = 'Race ' + raceTo1;
         document.getElementById('raceScoreRight').textContent = 'Race ' + raceTo2;
         document.getElementById('raceCenterValue').textContent = raceCenter || '-';
         document.getElementById('score1').textContent = s1;
         document.getElementById('score2').textContent = s2;
 
-        document.getElementById('raceLeft').style.display = showRace ? 'inline-flex' : 'none';
-        document.getElementById('raceRight').style.display = showRace ? 'inline-flex' : 'none';
         document.getElementById('raceCenter').style.display = showRace && sameRace ? 'inline-flex' : 'none';
         document.getElementById('raceScoreLeft').style.display = showRace && !sameRace ? 'inline-flex' : 'none';
         document.getElementById('raceScoreRight').style.display = showRace && !sameRace ? 'inline-flex' : 'none';
