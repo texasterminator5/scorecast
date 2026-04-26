@@ -227,7 +227,7 @@
           </div>
           <div class="field">
             <label>Race To (Left)</label>
-            <input type="text" id="raceTo1" value="-" placeholder="-">
+            <input type="text" id="raceTo1" value="" placeholder="">
           </div>
           <div class="field">
             <label>Score</label>
@@ -250,7 +250,7 @@
           </div>
           <div class="field">
             <label>Race To (Right)</label>
-            <input type="text" id="raceTo2" value="-" placeholder="-">
+            <input type="text" id="raceTo2" value="" placeholder="">
           </div>
           <div class="field">
             <label>Score</label>
@@ -414,8 +414,8 @@
         fargo2a: document.getElementById('fargo2a').value || '',
         showRace: document.getElementById('showRace').checked ? '1' : '0',
         showFargo: document.getElementById('showFargo').checked ? '1' : '0',
-        raceTo1: document.getElementById('raceTo1').value || '-',
-        raceTo2: document.getElementById('raceTo2').value || '-',
+        raceTo1: document.getElementById('raceTo1').value || '',
+        raceTo2: document.getElementById('raceTo2').value || '',
         s1: document.getElementById('s1').value || '0',
         s2: document.getElementById('s2').value || '0'
       };
@@ -675,8 +675,8 @@
       document.getElementById('fargo2a').value = '';
       document.getElementById('showRace').checked = true;
       document.getElementById('showFargo').checked = false;
-      document.getElementById('raceTo1').value = '-';
-      document.getElementById('raceTo2').value = '-';
+      document.getElementById('raceTo1').value = '';
+      document.getElementById('raceTo2').value = '';
       document.getElementById('s1').value = '0';
       document.getElementById('s2').value = '0';
       updateUrlBox();
