@@ -258,8 +258,8 @@
       var DESIGN_W = 1920, DESIGN_H = 1080;
       function applyScale() {
         var w = window.innerWidth, h = window.innerHeight;
-        var scaleFit = Math.max(w / DESIGN_W, h / DESIGN_H);
-        var scale = Math.max(1, scaleFit);
+        // Fit overlay within any browser-source viewport (Streamlabs/OBS safe).
+        var scale = Math.min(w / DESIGN_W, h / DESIGN_H);
         var el = document.getElementById('scaleRoot');
         if (el) el.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
       }
