@@ -20,13 +20,10 @@
       --race-offset: 34px;
     }
     .scale-root {
-      width: 1920px;
-      height: 1080px;
-      transform-origin: center center;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-      padding-bottom: 78px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: inline-block;
     }
     .broadcast {
       width: 1440px;
@@ -139,18 +136,19 @@
       justify-content: center;
     }
     .score-race {
-      min-width: 88px;
-      height: var(--race-height);
+      min-width: 104px;
+      height: 24px;
       padding: 0 10px;
       border-radius: 6px;
       border: 2px solid #000;
       background: #fff;
       color: #000;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       text-align: center;
+      white-space: nowrap;
       position: absolute;
       left: 50%;
       top: calc(var(--race-offset) * -1);
@@ -183,16 +181,17 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      height: var(--race-height);
+      height: 24px;
       padding: 0 10px;
       border-radius: 6px;
       border: 2px solid #000;
       background: #fff;
       color: #000;
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
+      white-space: nowrap;
       position: absolute;
       left: 50%;
       top: calc(var(--race-offset) * -1);
@@ -255,23 +254,6 @@
   </div>
   <script>
     (function() {
-      var DESIGN_W = 1920, DESIGN_H = 1080;
-      function applyScale() {
-        var w = window.innerWidth, h = window.innerHeight;
-        // Fit overlay within any browser-source viewport (Streamlabs/OBS safe).
-        var scale = Math.min(w / DESIGN_W, h / DESIGN_H);
-        var el = document.getElementById('scaleRoot');
-        if (el) el.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
-      }
-      var root = document.getElementById('scaleRoot');
-      if (root) {
-        root.style.position = 'absolute';
-        root.style.left = '50%';
-        root.style.top = '50%';
-      }
-      applyScale();
-      window.addEventListener('resize', applyScale);
-
       var params = new URLSearchParams(window.location.search);
       var room = params.get('room');
       var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
