@@ -92,9 +92,11 @@
       text-overflow: ellipsis;
       letter-spacing: 0.01em;
       text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+      text-align: center;
+      flex: 1;
     }
     .side.right .player-name {
-      text-align: right;
+      text-align: center;
     }
     .fargo-chip {
       min-width: 62px;
@@ -301,8 +303,8 @@
         document.getElementById('p2aName').textContent = p2a;
         document.getElementById('fargo1a').textContent = f1a || '---';
         document.getElementById('fargo2a').textContent = f2a || '---';
-        document.getElementById('raceScoreLeft').textContent = 'Race ' + raceTo1;
-        document.getElementById('raceScoreRight').textContent = 'Race ' + raceTo2;
+        document.getElementById('raceScoreLeft').textContent = 'Race To ' + raceTo1;
+        document.getElementById('raceScoreRight').textContent = 'Race To ' + raceTo2;
         document.getElementById('raceCenterValue').textContent = raceCenter || '-';
         document.getElementById('score1').textContent = s1;
         document.getElementById('score2').textContent = s2;
