@@ -67,6 +67,12 @@ function toOverlayUrl(
   url.pathname = url.pathname
     .replace(/\/control\.html$/i, '/index.html')
     .replace(/\/control$/i, '/index.html');
+  // Repo-root hosting: /control.html → overlay at /scoreboard-overlay/index.html (not repo root index).
+  const flat =
+    url.searchParams.get('overlayFlat') === '1' || url.searchParams.get('overlayFlat')?.toLowerCase() === 'true';
+  if (url.pathname === '/index.html' && !flat) {
+    url.pathname = '/scoreboard-overlay/index.html';
+  }
   const room = overrides?.room?.trim();
   const db = overrides?.db?.trim();
   if (room) url.searchParams.set('room', room);

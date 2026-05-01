@@ -441,9 +441,26 @@
         s2: document.getElementById('s2').value || '0'
       };
     }
+    function overlayPathnameFromControl() {
+      var p = location.pathname;
+      if (/control\.html$/i.test(p)) {
+        return p.replace(/control\.html$/i, 'index.html');
+      }
+      if (/\/control$/i.test(p)) {
+        return p.replace(/\/control$/i, '/index.html');
+      }
+      var dir = p.replace(/\/?control\.html$/, '') || '/';
+      return (dir.endsWith('/') ? dir : dir + '/') + 'index.html';
+    }
     function buildUrl() {
-      var path = location.pathname.replace(/\/?control\.html$/, '') || '/';
-      var base = location.origin + (path.endsWith('/') ? path : path + '/') + 'index.html';
+      var overlayPath = overlayPathnameFromControl();
+      // Static serve from repo root: control is often /control.html but overlay files live under /scoreboard-overlay/
+      var flatOverlay = (query.get('overlayFlat') || '').toLowerCase() === '1' ||
+        (query.get('overlayFlat') || '').toLowerCase() === 'true';
+      if (overlayPath === '/index.html' && !flatOverlay) {
+        overlayPath = '/scoreboard-overlay/index.html';
+      }
+      var base = location.origin + overlayPath;
       var liveMode = document.getElementById('liveMode').checked;
       var dbUrl = document.getElementById('firebaseUrl').value.trim();
       var roomId = document.getElementById('roomId').value.trim();
