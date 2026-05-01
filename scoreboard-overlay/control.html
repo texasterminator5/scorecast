@@ -7,13 +7,17 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { min-height: 100%; }
+    html { overflow-x: hidden; }
     body {
       font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
       background: #0b0b0b;
       color: #e5e7eb;
       min-height: 100dvh;
       padding: clamp(10px, 1.6vh, 14px);
-      overflow: hidden;
+      padding-bottom: max(clamp(18px, 3vh, 28px), env(safe-area-inset-bottom, 0px));
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
     }
     .container {
       width: min(980px, 100%);
@@ -21,6 +25,7 @@
       display: flex;
       flex-direction: column;
       gap: clamp(8px, 1.2vh, 10px);
+      padding-bottom: 12px;
     }
     .topbar {
       display: flex;
@@ -195,9 +200,6 @@
       .meta-grid {
         grid-template-columns: 1fr;
       }
-      .container {
-        max-height: 100dvh;
-      }
       .btn {
         width: 100%;
       }
@@ -266,7 +268,7 @@
       <div class="meta-grid">
         <div class="field">
           <label>Room ID</label>
-          <input type="text" id="roomId" placeholder="room id" readonly>
+          <input type="text" id="roomId" placeholder="room id" autocomplete="off" spellcheck="false">
         </div>
         <button class="btn btn-secondary" id="openUrl">Preview Overlay</button>
       </div>
@@ -338,7 +340,9 @@
       if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').checked = true;
       if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').disabled = true;
       if (forcedDbUrl) document.getElementById('firebaseUrl').setAttribute('readonly', 'readonly');
-      if (lockRoom && forcedRoomId) document.getElementById('roomId').setAttribute('readonly', 'readonly');
+      var roomInput = document.getElementById('roomId');
+      if (lockRoom && forcedRoomId) roomInput.setAttribute('readonly', 'readonly');
+      else roomInput.removeAttribute('readonly');
 
       // Live mode is now always on for app users, so hide controls that are no longer needed.
       var liveToggleRow = document.getElementById('liveMode').closest('label');
