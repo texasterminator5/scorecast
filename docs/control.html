@@ -522,10 +522,10 @@
       return dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(roomId) + '.json';
     }
     function pushToFirebase() {
-      if (!canSyncLiveData()) return;
+      if (!canSyncLiveData()) return Promise.resolve();
       var url = getRoomUrl();
-      if (!url) return;
-      fetch(url, {
+      if (!url) return Promise.resolve();
+      return fetch(url, {
         method: 'PUT',
         body: JSON.stringify(getState()),
         headers: { 'Content-Type': 'application/json' }
@@ -631,6 +631,26 @@
         } else stopSync();
       }, 400);
     }
+    var roomResyncDebounce;
+    function commitRoomAndResync() {
+      saveLiveSettings();
+      notifyScorecastAppLive();
+      if (!document.getElementById('liveMode').checked || !getRoomUrl()) {
+        stopSync();
+        return;
+      }
+      startSync();
+      // New room has no document yet; PATCH only runs for score/name fields, so seed full state before reload.
+      pushToFirebase().then(function() { loadFromFirebase(); }, function() { loadFromFirebase(); });
+    }
+    function scheduleRoomInputResync() {
+      clearTimeout(roomResyncDebounce);
+      roomResyncDebounce = setTimeout(commitRoomAndResync, 750);
+    }
+    function flushRoomResyncNow() {
+      clearTimeout(roomResyncDebounce);
+      commitRoomAndResync();
+    }
     (function loadSaved() {
       try {
         var s = localStorage.getItem(LIVE_STORAGE);
@@ -679,17 +699,17 @@
     document.getElementById('firebaseUrl').addEventListener('change', function() {
       saveLiveSettings();
       notifyScorecastAppLive();
-      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) {
+        startSync();
+        pushToFirebase().then(function() { loadFromFirebase(); }, function() { loadFromFirebase(); });
+      } else stopSync();
     });
     document.getElementById('roomId').addEventListener('input', function() {
       notifyScorecastAppLive();
-      maybeStartSync();
+      scheduleRoomInputResync();
     });
-    document.getElementById('roomId').addEventListener('change', function() {
-      saveLiveSettings();
-      notifyScorecastAppLive();
-      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
-    });
+    document.getElementById('roomId').addEventListener('change', flushRoomResyncNow);
+    document.getElementById('roomId').addEventListener('blur', flushRoomResyncNow);
     document.getElementById('liveMode').addEventListener('change', function() {
       saveLiveSettings();
       updateUrlBox();

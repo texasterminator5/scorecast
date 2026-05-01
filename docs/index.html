@@ -205,8 +205,6 @@
   <script>
     (function() {
       var params = new URLSearchParams(window.location.search);
-      var room = params.get('room');
-      var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
 
       function asBool(v, fallback) {
         if (v == null) return fallback;
@@ -260,10 +258,18 @@
         document.getElementById('fargo2a').style.display = showFargo ? 'inline-flex' : 'none';
       }
 
-      if (room && dbUrl) {
-        var url = dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(room) + '.json';
+      if (params.get('room') && params.get('db')) {
         function poll() {
-          fetch(url).then(function(r) { return r.json(); }).then(applyState).catch(function() {});
+          var liveParams = new URLSearchParams(window.location.search);
+          var rId = liveParams.get('room');
+          var dbRaw = liveParams.get('db');
+          var db = dbRaw ? decodeURIComponent(dbRaw) : '';
+          if (!rId || !db) return;
+          var pollUrl = db.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(rId) + '.json';
+          fetch(pollUrl, { cache: 'no-store' })
+            .then(function(res) { return res.ok ? res.json() : Promise.resolve(null); })
+            .then(applyState)
+            .catch(function() {});
         }
         poll();
         setInterval(poll, 2000);
