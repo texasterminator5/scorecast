@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scoreboard Control</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { min-height: 100%; }
+    html { overflow-x: hidden; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0b0b0b;
+      color: #e5e7eb;
+      min-height: 100dvh;
+      padding: clamp(10px, 1.6vh, 14px);
+      padding-bottom: max(clamp(18px, 3vh, 28px), env(safe-area-inset-bottom, 0px));
+      overflow-x: hidden;
+      overflow-y: auto;
+      scroll-padding-bottom: max(28px, env(safe-area-inset-bottom, 0px));
+    }
+    .container {
+      width: min(980px, 100%);
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(8px, 1.2vh, 10px);
+      padding-bottom: 12px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      background: rgba(20, 20, 20, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    h1 {
+      font-size: clamp(1rem, 2.2vw, 1.28rem);
+      color: #fff;
+      letter-spacing: 0.01em;
+      font-weight: 700;
+    }
+    .subtitle {
+      color: #94a3b8;
+      font-size: clamp(0.72rem, 1.8vw, 0.84rem);
+    }
+    .panel {
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      background: rgba(20, 20, 20, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      padding: clamp(10px, 1.6vh, 14px);
+    }
+    .teams-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: clamp(8px, 1.2vh, 10px);
+    }
+    .team-card {
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 14px;
+      background: rgba(10, 10, 10, 0.82);
+      padding: clamp(8px, 1.2vh, 10px);
+      display: grid;
+      gap: 8px;
+    }
+    .field { min-width: 0; }
+    label {
+      display: block;
+      font-size: 0.76rem;
+      color: #94a3b8;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      height: clamp(38px, 5.8vh, 44px);
+      padding: 0 12px;
+      font-size: clamp(0.92rem, 2.4vw, 1rem);
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.92);
+      color: #f8fafc;
+      text-align: center;
+    }
+    input:focus {
+      outline: none;
+      border-color: #d1d5db;
+      box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.18);
+    }
+    .score-row {
+      display: grid;
+      grid-template-columns: clamp(42px, 8vw, 48px) 1fr clamp(42px, 8vw, 48px);
+      align-items: center;
+      gap: 8px;
+    }
+    .score-row input {
+      text-align: center;
+      font-size: clamp(1.05rem, 2.6vw, 1.18rem);
+      font-weight: 700;
+    }
+    .score-row .btn-inc {
+      height: clamp(42px, 6.8vh, 48px);
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.34);
+      background: rgba(30, 41, 59, 0.9);
+      color: #e2e8f0;
+      font-size: 1.45rem;
+      line-height: 1;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .score-row .btn-inc:hover { background: rgba(51, 65, 85, 0.95); }
+    .meta-grid {
+      margin-top: clamp(8px, 1.2vh, 10px);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+    .btn {
+      height: clamp(38px, 5.8vh, 44px);
+      padding: 0 14px;
+      font-size: clamp(0.88rem, 2.1vw, 0.96rem);
+      font-weight: 650;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: #e5e7eb;
+      color: #fff;
+    }
+    .btn-secondary {
+      background: rgba(30, 41, 59, 0.92);
+      border-color: rgba(148, 163, 184, 0.3);
+      color: #e5e7eb;
+    }
+    .danger {
+      margin-top: 6px;
+      background: rgba(60, 60, 60, 0.75);
+      border-color: rgba(255, 255, 255, 0.24);
+      color: #f5f5f5;
+      width: 100%;
+    }
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 20px;
+      background: #22c55e;
+      color: #fff;
+      border-radius: 8px;
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .toast.show { opacity: 1; }
+    .auth-status {
+      margin: -8px 0 16px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.35;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(0,0,0,0.25);
+      color: rgba(255,255,255,0.85);
+    }
+    .auth-status[data-state="error"] {
+      border-color: rgba(220, 38, 38, 0.7);
+      background: rgba(127, 29, 29, 0.25);
+      color: #fecaca;
+    }
+    .auth-status[data-state="ok"] {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: rgba(20, 83, 45, 0.25);
+      color: #bbf7d0;
+    }
+    @media (max-width: 780px) {
+      .topbar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .auth-status {
+        width: 100%;
+      }
+      .teams-grid {
+        grid-template-columns: 1fr;
+      }
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+      .btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+    <h1>Scorecast Control</h1>
+        <p class="subtitle">Fast score updates with live overlay sync</p>
+      </div>
+      <div class="auth-status" id="authStatus" data-state="checking">Checking access...</div>
+    </div>
+
+    <div class="panel">
+      <div class="teams-grid">
+        <div class="team-card">
+          <div class="field">
+            <label>Player</label>
+            <input type="text" id="p1a" value="Player" placeholder="Player">
+          </div>
+          <div class="field">
+            <label>Fargo</label>
+            <input type="text" id="fargo1a" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Race To (Left)</label>
+            <input type="text" id="raceTo1" value="" placeholder="">
+          </div>
+          <div class="field">
+            <label>Score</label>
+            <div class="score-row">
+              <button type="button" class="btn-inc" id="s1Down" aria-label="Decrease Team 1 Score">−</button>
+              <input type="number" id="s1" value="0" min="0" max="999">
+              <button type="button" class="btn-inc" id="s1Up" aria-label="Increase Team 1 Score">+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="field">
+            <label>Player</label>
+            <input type="text" id="p2a" value="Player" placeholder="Player">
+          </div>
+          <div class="field">
+            <label>Fargo</label>
+            <input type="text" id="fargo2a" value="" placeholder="---">
+          </div>
+          <div class="field">
+            <label>Race To (Right)</label>
+            <input type="text" id="raceTo2" value="" placeholder="">
+          </div>
+          <div class="field">
+            <label>Score</label>
+            <div class="score-row">
+              <button type="button" class="btn-inc" id="s2Down" aria-label="Decrease Team 2 Score">−</button>
+              <input type="number" id="s2" value="0" min="0" max="999">
+              <button type="button" class="btn-inc" id="s2Up" aria-label="Increase Team 2 Score">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="meta-grid">
+        <div class="field">
+          <label>Room ID</label>
+          <input type="text" id="roomId" placeholder="room id" autocomplete="off" spellcheck="false">
+        </div>
+        <button class="btn btn-secondary" id="openUrl">Preview Overlay</button>
+      </div>
+      <div class="meta-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 8px;">
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:center;gap:8px;text-transform:none;letter-spacing:0;font-size:0.84rem;">
+            <input type="checkbox" id="showRace" checked style="width:18px;height:18px;">
+            Show Race To
+          </label>
+        </div>
+        <div class="field">
+          <label style="display:flex;align-items:center;justify-content:center;gap:8px;text-transform:none;letter-spacing:0;font-size:0.84rem;">
+            <input type="checkbox" id="showFargo" style="width:18px;height:18px;">
+            Show Fargo
+          </label>
+        </div>
+      </div>
+
+      <button class="btn btn-secondary danger" id="resetBtn">Reset Scores & Names</button>
+
+      <div class="live-section" style="display:none;">
+        <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; cursor: pointer;">
+          <input type="checkbox" id="liveMode" style="width: auto;">
+          <span>Live update</span>
+        </label>
+        <div class="field" id="firebaseField" style="margin-bottom: 10px;">
+          <label>Firebase Database URL</label>
+          <input type="text" id="firebaseUrl" placeholder="https://your-project.firebaseio.com">
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="toast" id="toast">URL copied to clipboard</div>
+  <script>
+    var LIVE_STORAGE = 'pool-overlay-live';
+    var query = new URLSearchParams(location.search);
+    var forcedDbUrl = query.get('db') ? decodeURIComponent(query.get('db')) : '';
+    var forcedRoomId = query.get('room') ? decodeURIComponent(query.get('room')) : '';
+    var forcedLive = (query.get('live') || '').toLowerCase() === '1' || (query.get('live') || '').toLowerCase() === 'true' || (!!forcedDbUrl && !!forcedRoomId);
+    var lockRoom = (query.get('lockRoom') || '').toLowerCase() === '1' || (query.get('lockRoom') || '').toLowerCase() === 'true';
+    var ALWAYS_LIVE = true;
+    var LOCAL_EDIT_GRACE_MS = 1800;
+    var lastEditedAt = {};
+    var isAuthorized = false;
+    var ALLOW_ANONYMOUS_WEB = true;
+    var authToken = (window.__scorecastAuthToken || query.get('token') || '').toString().trim();
+    var verifyUrl = (window.__scorecastVerifyUrl || query.get('verify') || '').toString().trim();
+    var CONTROL_IDS = ['p1a', 'p2a', 'fargo1a', 'fargo2a', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2', 'liveMode', 'firebaseUrl', 'roomId', 'openUrl', 'resetBtn', 's1Up', 's1Down', 's2Up', 's2Down'];
+    function setAuthStatus(text, state) {
+      var el = document.getElementById('authStatus');
+      if (!el) return;
+      el.textContent = text;
+      el.setAttribute('data-state', state || 'checking');
+    }
+    function setControlsEnabled(enabled) {
+      CONTROL_IDS.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (enabled) el.removeAttribute('disabled');
+        else el.setAttribute('disabled', 'disabled');
+      });
+    }
+    function canSyncLiveData() {
+      return isAuthorized && document.getElementById('liveMode').checked;
+    }
+    var notifyAppDebounce;
+    function notifyScorecastAppLive() {
+      clearTimeout(notifyAppDebounce);
+      notifyAppDebounce = setTimeout(function() {
+        try {
+          if (!window.ReactNativeWebView || !window.ReactNativeWebView.postMessage) return;
+          var roomEl = document.getElementById('roomId');
+          var dbEl = document.getElementById('firebaseUrl');
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'scorecast-live',
+            roomId: roomEl ? roomEl.value.trim() : '',
+            dbUrl: dbEl ? dbEl.value.trim() : ''
+          }));
+        } catch (e) {}
+      }, 80);
+    }
+    function applyForcedLiveSettings() {
+      if (forcedDbUrl) document.getElementById('firebaseUrl').value = forcedDbUrl;
+      if (forcedRoomId) document.getElementById('roomId').value = forcedRoomId;
+      if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').checked = true;
+      if (forcedLive || ALWAYS_LIVE) document.getElementById('liveMode').disabled = true;
+      if (forcedDbUrl) document.getElementById('firebaseUrl').setAttribute('readonly', 'readonly');
+      var roomInput = document.getElementById('roomId');
+      if (lockRoom && forcedRoomId) roomInput.setAttribute('readonly', 'readonly');
+      else roomInput.removeAttribute('readonly');
+
+      // Live mode is now always on for app users, so hide controls that are no longer needed.
+      var liveToggleRow = document.getElementById('liveMode').closest('label');
+      if (liveToggleRow) liveToggleRow.style.display = 'none';
+      var firebaseField = document.getElementById('firebaseField');
+      if (firebaseField) firebaseField.style.display = 'none';
+      notifyScorecastAppLive();
+    }
+    function verifyAccess() {
+      if (ALLOW_ANONYMOUS_WEB) {
+        isAuthorized = true;
+        setControlsEnabled(true);
+        setAuthStatus('Web mode enabled. No sign-in required.', 'ok');
+        applyForcedLiveSettings();
+        saveLiveSettings();
+        updateUrlBox();
+        loadFromFirebase();
+        startSync();
+        return Promise.resolve(true);
+      }
+
+      if (!verifyUrl || !authToken) {
+        setAuthStatus('Sign in through the Scorecast app to use this control page.', 'error');
+        setControlsEnabled(false);
+        return Promise.resolve(false);
+      }
+      setAuthStatus('Checking access...', 'checking');
+      return fetch(verifyUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + authToken,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          requestedRoomId: document.getElementById('roomId').value.trim() || null
+        })
+      })
+        .then(function(r) {
+          return r.json().catch(function() { return null; }).then(function(data) {
+            return { ok: r.ok, data: data };
+          });
+        })
+        .then(function(result) {
+          if (!result.ok || !result.data || !result.data.allowed) {
+            throw new Error((result.data && result.data.error) || 'Unauthorized');
+          }
+          isAuthorized = true;
+          if (result.data.roomId) {
+            forcedRoomId = String(result.data.roomId);
+            document.getElementById('roomId').value = forcedRoomId;
+          }
+          setControlsEnabled(true);
+          setAuthStatus('Authenticated. Live updates are active.', 'ok');
+          applyForcedLiveSettings();
+          saveLiveSettings();
+          updateUrlBox();
+          loadFromFirebase();
+          startSync();
+          return true;
+        })
+        .catch(function() {
+          isAuthorized = false;
+          setControlsEnabled(false);
+          setAuthStatus('Access denied. Please open this page from the Scorecast app.', 'error');
+          stopSync();
+          return false;
+        });
+    }
+    function getState() {
+      return {
+        p1a: document.getElementById('p1a').value || 'Player',
+        p2a: document.getElementById('p2a').value || 'Player',
+        fargo1a: document.getElementById('fargo1a').value || '',
+        fargo2a: document.getElementById('fargo2a').value || '',
+        showRace: document.getElementById('showRace').checked ? '1' : '0',
+        showFargo: document.getElementById('showFargo').checked ? '1' : '0',
+        raceTo1: document.getElementById('raceTo1').value || '',
+        raceTo2: document.getElementById('raceTo2').value || '',
+        s1: document.getElementById('s1').value || '0',
+        s2: document.getElementById('s2').value || '0'
+      };
+    }
+    function buildUrl() {
+      var path = location.pathname.replace(/\/?control\.html$/, '') || '/';
+      var base = location.origin + (path.endsWith('/') ? path : path + '/') + 'index.html';
+      var liveMode = document.getElementById('liveMode').checked;
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (liveMode && dbUrl && roomId) {
+        return base + '?room=' + encodeURIComponent(roomId) + '&db=' + encodeURIComponent(dbUrl);
+      }
+      var params = new URLSearchParams();
+      var s = getState();
+      params.set('p1a', s.p1a);
+      params.set('p2a', s.p2a);
+      params.set('fargo1a', s.fargo1a);
+      params.set('fargo2a', s.fargo2a);
+      params.set('showRace', s.showRace);
+      params.set('showFargo', s.showFargo);
+      params.set('raceTo1', s.raceTo1);
+      params.set('raceTo2', s.raceTo2);
+      params.set('s1', s.s1);
+      params.set('s2', s.s2);
+      return base + (base.includes('?') ? '&' : '?') + params.toString();
+    }
+    function updateUrlBox() {}
+    function showToast(message, isError) {
+      var t = document.getElementById('toast');
+      t.textContent = message;
+      t.style.background = isError ? '#dc2626' : '#22c55e';
+      t.classList.add('show');
+      setTimeout(function() { t.classList.remove('show'); }, 2200);
+    }
+    function copyText(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        return navigator.clipboard.writeText(text).then(function() { return true; }).catch(function() { return false; });
+      }
+      return Promise.resolve(false);
+    }
+    function legacyCopyText(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', 'readonly');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        ta.style.pointerEvents = 'none';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, ta.value.length);
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        return !!ok;
+      } catch (e) {
+        return false;
+      }
+    }
+    var ids = ['p1a', 'p2a', 'fargo1a', 'fargo2a', 'showRace', 'showFargo', 'raceTo1', 'raceTo2', 's1', 's2'];
+    function getRoomUrl() {
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (!dbUrl || !roomId) return '';
+      return dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(roomId) + '.json';
+    }
+    function pushToFirebase() {
+      if (!canSyncLiveData()) return;
+      var url = getRoomUrl();
+      if (!url) return;
+      fetch(url, {
+        method: 'PUT',
+        body: JSON.stringify(getState()),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function() {});
+    }
+    function patchFieldToFirebase(id, value) {
+      if (!canSyncLiveData()) return;
+      var url = getRoomUrl();
+      if (!url) return;
+      var payload = {};
+      payload[id] = value != null ? value : '';
+      fetch(url, {
+        method: 'PATCH',
+        body: JSON.stringify(payload),
+        headers: { 'Content-Type': 'application/json' }
+      }).catch(function() {});
+    }
+    var pushDebounceById = {};
+    function schedulePushField(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      clearTimeout(pushDebounceById[id]);
+      pushDebounceById[id] = setTimeout(function() {
+        var value;
+        if (el.type === 'checkbox') value = el.checked ? '1' : '0';
+        else value = el.value != null ? el.value.trim() : '';
+        patchFieldToFirebase(id, value);
+      }, 400);
+    }
+    var pushDebounce;
+    function schedulePush() {
+      clearTimeout(pushDebounce);
+      pushDebounce = setTimeout(pushToFirebase, 400);
+    }
+    function randomRoomId() {
+      return 'room-' + Math.random().toString(36).slice(2, 10);
+    }
+    function applyStateToForm(data, skipFocused) {
+      var focused = document.activeElement;
+      ids.forEach(function(id) {
+        if (skipFocused && document.getElementById(id) === focused) return;
+        var lastEditMs = lastEditedAt[id] || 0;
+        if (skipFocused && Date.now() - lastEditMs < LOCAL_EDIT_GRACE_MS) return;
+        if (data[id] === undefined) return;
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (el.type === 'checkbox') {
+          el.checked = data[id] === true || data[id] === '1' || data[id] === 1 || String(data[id]).toLowerCase() === 'true';
+        } else {
+          el.value = data[id] != null ? String(data[id]) : '';
+        }
+      });
+    }
+    function markLocalEdit(id) {
+      lastEditedAt[id] = Date.now();
+    }
+    function fetchRoom(opts) {
+      opts = opts || {};
+      var url = getRoomUrl();
+      if (!url) return Promise.resolve(null);
+      var cacheBuster = url + (url.indexOf('?') !== -1 ? '&' : '?') + '_=' + Date.now();
+      return fetch(cacheBuster, { cache: 'no-store' }).then(function(r) {
+        return r.ok ? r.json() : null;
+      }).catch(function() { return null; });
+    }
+    function loadFromFirebase() {
+      if (!getRoomUrl() || !canSyncLiveData()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, false);
+        updateUrlBox();
+      });
+    }
+    var syncInterval;
+    function startSync() {
+      clearInterval(syncInterval);
+      if (!canSyncLiveData() || !getRoomUrl()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, true);
+      });
+      syncInterval = setInterval(function() {
+        fetchRoom().then(function(data) {
+          if (data) applyStateToForm(data, true);
+        });
+      }, 2000);
+    }
+    function stopSync() {
+      clearInterval(syncInterval);
+      syncInterval = null;
+    }
+    function runSyncOnce() {
+      if (!canSyncLiveData() || !getRoomUrl()) return;
+      fetchRoom().then(function(data) {
+        if (data) applyStateToForm(data, true);
+      });
+    }
+    var syncStartDebounce;
+    function maybeStartSync() {
+      clearTimeout(syncStartDebounce);
+      syncStartDebounce = setTimeout(function() {
+        if (document.getElementById('liveMode').checked && getRoomUrl()) {
+          loadFromFirebase();
+          startSync();
+        } else stopSync();
+      }, 400);
+    }
+    (function loadSaved() {
+      try {
+        var s = localStorage.getItem(LIVE_STORAGE);
+        if (s) {
+          var d = JSON.parse(s);
+          if (d.firebaseUrl) document.getElementById('firebaseUrl').value = d.firebaseUrl;
+          if (d.roomId) document.getElementById('roomId').value = d.roomId;
+          else document.getElementById('roomId').value = randomRoomId();
+          if (d.liveMode) document.getElementById('liveMode').checked = true;
+        } else {
+          document.getElementById('roomId').value = randomRoomId();
+        }
+        if (document.getElementById('liveMode').checked && getRoomUrl()) {
+          loadFromFirebase();
+          startSync();
+        }
+      } catch (e) {}
+      applyForcedLiveSettings();
+      saveLiveSettings();
+      setControlsEnabled(false);
+      verifyAccess();
+    })();
+    function saveLiveSettings() {
+      try {
+        localStorage.setItem(LIVE_STORAGE, JSON.stringify({
+          firebaseUrl: document.getElementById('firebaseUrl').value.trim(),
+          roomId: document.getElementById('roomId').value.trim(),
+          liveMode: document.getElementById('liveMode').checked
+        }));
+      } catch (e) {}
+    }
+    document.getElementById('p1a').addEventListener('input', function() { markLocalEdit('p1a'); updateUrlBox(); schedulePushField('p1a'); });
+    document.getElementById('p2a').addEventListener('input', function() { markLocalEdit('p2a'); updateUrlBox(); schedulePushField('p2a'); });
+    document.getElementById('fargo1a').addEventListener('input', function() { markLocalEdit('fargo1a'); updateUrlBox(); schedulePushField('fargo1a'); });
+    document.getElementById('fargo2a').addEventListener('input', function() { markLocalEdit('fargo2a'); updateUrlBox(); schedulePushField('fargo2a'); });
+    document.getElementById('showRace').addEventListener('change', function() { markLocalEdit('showRace'); updateUrlBox(); schedulePushField('showRace'); });
+    document.getElementById('showFargo').addEventListener('change', function() { markLocalEdit('showFargo'); updateUrlBox(); schedulePushField('showFargo'); });
+    document.getElementById('raceTo1').addEventListener('input', function() { markLocalEdit('raceTo1'); updateUrlBox(); schedulePushField('raceTo1'); });
+    document.getElementById('raceTo2').addEventListener('input', function() { markLocalEdit('raceTo2'); updateUrlBox(); schedulePushField('raceTo2'); });
+    document.getElementById('s1').addEventListener('input', function() { markLocalEdit('s1'); updateUrlBox(); schedulePushField('s1'); });
+    document.getElementById('s2').addEventListener('input', function() { markLocalEdit('s2'); updateUrlBox(); schedulePushField('s2'); });
+    document.getElementById('firebaseUrl').addEventListener('input', function() {
+      notifyScorecastAppLive();
+      maybeStartSync();
+    });
+    document.getElementById('firebaseUrl').addEventListener('change', function() {
+      saveLiveSettings();
+      notifyScorecastAppLive();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.getElementById('roomId').addEventListener('input', function() {
+      notifyScorecastAppLive();
+      maybeStartSync();
+    });
+    document.getElementById('roomId').addEventListener('change', function() {
+      saveLiveSettings();
+      notifyScorecastAppLive();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.getElementById('liveMode').addEventListener('change', function() {
+      saveLiveSettings();
+      updateUrlBox();
+      if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
+    });
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'visible') runSyncOnce();
+    });
+    document.getElementById('openUrl').addEventListener('click', function() {
+      window.open(buildUrl(), '_blank');
+    });
+    function changeScore(id, delta) {
+      var el = document.getElementById(id);
+      var n = parseInt(el.value, 10) || 0;
+      n = Math.max(0, Math.min(999, n + delta));
+      el.value = n;
+      markLocalEdit(id);
+      updateUrlBox();
+      schedulePushField(id);
+    }
+    document.getElementById('s1Up').addEventListener('click', function() { changeScore('s1', 1); });
+    document.getElementById('s1Down').addEventListener('click', function() { changeScore('s1', -1); });
+    document.getElementById('s2Up').addEventListener('click', function() { changeScore('s2', 1); });
+    document.getElementById('s2Down').addEventListener('click', function() { changeScore('s2', -1); });
+    document.getElementById('resetBtn').addEventListener('click', function() {
+      document.getElementById('p1a').value = 'Player';
+      document.getElementById('p2a').value = 'Player';
+      document.getElementById('fargo1a').value = '';
+      document.getElementById('fargo2a').value = '';
+      document.getElementById('showRace').checked = true;
+      document.getElementById('showFargo').checked = false;
+      document.getElementById('raceTo1').value = '';
+      document.getElementById('raceTo2').value = '';
+      document.getElementById('s1').value = '0';
+      document.getElementById('s2').value = '0';
+      updateUrlBox();
+      schedulePush();
+      showToast('Fields reset');
+    });
+    updateUrlBox();
+  </script>
+</body>
+</html>

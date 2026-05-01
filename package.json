@@ -9,6 +9,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "overlay:serve": "npx -y serve scoreboard-overlay -p 8080",
+    "overlay:sync-docs": "node scripts/sync-overlay-to-docs.js",
     "lint": "expo lint"
   },
   "dependencies": {

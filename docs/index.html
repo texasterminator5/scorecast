@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Scorecast Broadcast Overlay</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: transparent;
+    }
+
+    :root {
+      --overlay-width: 1040px;
+      --overlay-height: 140px;
+      --edge-gap: 6px;
+      --race-offset: 36px;
+    }
+
+    .overlay-root {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: var(--overlay-width);
+      height: var(--overlay-height);
+      overflow: visible;
+    }
+
+    .race-center {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translate(-50%, 0);
+      min-width: 116px;
+      height: 26px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      background: #fff;
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+    .race-center b {
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .main-row {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: var(--race-offset);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--edge-gap);
+    }
+
+    .player-card {
+      width: 332px;
+      height: 45px;
+      padding: 4px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border: 2px solid #000;
+      border-radius: 8px;
+      background: #fff;
+    }
+    .player-card.right {
+      flex-direction: row-reverse;
+    }
+    .player-name {
+      flex: 1;
+      font-size: 17px;
+      font-weight: 800;
+      color: #000;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .fargo {
+      min-width: 62px;
+      height: 24px;
+      padding: 0 8px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 12px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .score-wrap {
+      width: 364px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      position: relative;
+      overflow: visible;
+    }
+    .score-col {
+      width: 126px;
+      height: 64px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    .score-box {
+      width: 126px;
+      height: 64px;
+      border: 2px solid #000;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 46px;
+      font-weight: 860;
+      line-height: 1;
+    }
+    .score-divider {
+      font-size: 34px;
+      font-weight: 800;
+      color: #000;
+      line-height: 1;
+    }
+
+    .race-split {
+      position: absolute;
+      left: 50%;
+      top: -30px;
+      transform: translateX(-50%);
+      min-width: 104px;
+      height: 24px;
+      padding: 0 10px;
+      border: 2px solid #000;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      color: #000;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay-root">
+    <div class="race-center" id="raceCenter">Race To <b id="raceCenterValue">-</b></div>
+
+    <div class="main-row">
+      <div class="player-card left">
+        <span class="player-name" id="p1aName">Player</span>
+        <span class="fargo" id="fargo1a">---</span>
+      </div>
+
+      <div class="score-wrap">
+        <div class="score-col">
+          <span class="race-split" id="raceScoreLeft">Race To -</span>
+          <span class="score-box" id="score1">0</span>
+        </div>
+        <span class="score-divider">-</span>
+        <div class="score-col">
+          <span class="race-split" id="raceScoreRight">Race To -</span>
+          <span class="score-box" id="score2">0</span>
+        </div>
+      </div>
+
+      <div class="player-card right">
+        <span class="player-name" id="p2aName">Player</span>
+        <span class="fargo" id="fargo2a">---</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var room = params.get('room');
+      var dbUrl = params.get('db') ? decodeURIComponent(params.get('db')) : '';
+
+      function asBool(v, fallback) {
+        if (v == null) return fallback;
+        var s = String(v).toLowerCase();
+        if (s === '1' || s === 'true' || s === 'yes' || s === 'on') return true;
+        if (s === '0' || s === 'false' || s === 'no' || s === 'off') return false;
+        return fallback;
+      }
+
+      function applyState(data) {
+        var d = data || {};
+        var p1a = (d.p1a != null ? d.p1a : d.team1 != null ? d.team1 : 'Player').toString();
+        var p2a = (d.p2a != null ? d.p2a : d.team2 != null ? d.team2 : 'Player').toString();
+        var f1a = (d.fargo1a != null ? d.fargo1a : '').toString();
+        var f2a = (d.fargo2a != null ? d.fargo2a : '').toString();
+        var s1 = (d.s1 != null ? d.s1 : 0).toString();
+        var s2 = (d.s2 != null ? d.s2 : 0).toString();
+        var raceTo1 = (d.raceTo1 != null ? d.raceTo1 : '-').toString();
+        var raceTo2 = (d.raceTo2 != null ? d.raceTo2 : '-').toString();
+        var showRace = asBool(d.showRace, true);
+        var showFargo = asBool(d.showFargo, false);
+        var sameRace = raceTo1 === raceTo2;
+        var raceCenter = sameRace ? raceTo1 : raceTo1 + '/' + raceTo2;
+
+        document.getElementById('p1aName').textContent = p1a;
+        document.getElementById('p2aName').textContent = p2a;
+        document.getElementById('fargo1a').textContent = f1a || '---';
+        document.getElementById('fargo2a').textContent = f2a || '---';
+        document.getElementById('score1').textContent = s1;
+        document.getElementById('score2').textContent = s2;
+
+        document.getElementById('raceCenterValue').textContent = raceCenter || '-';
+        document.getElementById('raceScoreLeft').textContent = 'Race To ' + raceTo1;
+        document.getElementById('raceScoreRight').textContent = 'Race To ' + raceTo2;
+
+        if (!showRace) {
+          document.getElementById('raceCenter').style.display = 'none';
+          document.getElementById('raceScoreLeft').style.display = 'none';
+          document.getElementById('raceScoreRight').style.display = 'none';
+        } else if (sameRace) {
+          document.getElementById('raceCenter').style.display = 'inline-flex';
+          document.getElementById('raceScoreLeft').style.display = 'none';
+          document.getElementById('raceScoreRight').style.display = 'none';
+        } else {
+          document.getElementById('raceCenter').style.display = 'none';
+          document.getElementById('raceScoreLeft').style.display = 'inline-flex';
+          document.getElementById('raceScoreRight').style.display = 'inline-flex';
+        }
+
+        document.getElementById('fargo1a').style.display = showFargo ? 'inline-flex' : 'none';
+        document.getElementById('fargo2a').style.display = showFargo ? 'inline-flex' : 'none';
+      }
+
+      if (room && dbUrl) {
+        var url = dbUrl.replace(/\/$/, '') + '/rooms/' + encodeURIComponent(room) + '.json';
+        function poll() {
+          fetch(url).then(function(r) { return r.json(); }).then(applyState).catch(function() {});
+        }
+        poll();
+        setInterval(poll, 2000);
+      } else {
+        var t1 = params.get('team1');
+        var t2 = params.get('team2');
+        applyState({
+          p1a: params.get('p1a') || (t1 ? decodeURIComponent(t1) : 'Player'),
+          p2a: params.get('p2a') || (t2 ? decodeURIComponent(t2) : 'Player'),
+          fargo1a: params.get('fargo1a') || '',
+          fargo2a: params.get('fargo2a') || '',
+          showRace: params.get('showRace'),
+          showFargo: params.get('showFargo'),
+          s1: params.get('s1') || '0',
+          s2: params.get('s2') || '0',
+          raceTo1: params.get('raceTo1') || params.get('raceTo') || '-',
+          raceTo2: params.get('raceTo2') || params.get('raceTo') || '-'
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
