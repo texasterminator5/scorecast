@@ -306,6 +306,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
     var LIVE_STORAGE = 'pool-overlay-live';
+    var DEFAULT_FIREBASE_RTDB = 'https://pool-score-1a1f3-default-rtdb.firebaseio.com';
     var query = new URLSearchParams(location.search);
     var forcedDbUrl = query.get('db') ? decodeURIComponent(query.get('db')) : '';
     var forcedRoomId = query.get('room') ? decodeURIComponent(query.get('room')) : '';
@@ -351,6 +352,12 @@
           }));
         } catch (e) {}
       }, 80);
+    }
+    function ensureDefaultFirebaseUrl() {
+      var el = document.getElementById('firebaseUrl');
+      if (!el || el.readOnly) return;
+      var v = el.value.trim();
+      if (!v) el.value = DEFAULT_FIREBASE_RTDB;
     }
     function applyForcedLiveSettings() {
       if (forcedDbUrl) document.getElementById('firebaseUrl').value = forcedDbUrl;
@@ -712,12 +719,9 @@
         } else {
           document.getElementById('roomId').value = randomRoomId();
         }
-        if (document.getElementById('liveMode').checked && getRoomUrl()) {
-          loadFromFirebase();
-          startSync();
-        }
       } catch (e) {}
       applyForcedLiveSettings();
+      ensureDefaultFirebaseUrl();
       saveLiveSettings();
       setControlsEnabled(false);
       verifyAccess();

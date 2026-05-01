@@ -18,4 +18,11 @@ for (const name of FILES) {
   fs.copyFileSync(path.join(srcDir, name), path.join(dstDir, name));
 }
 fs.writeFileSync(path.join(dstDir, '.nojekyll'), '');
-console.log('Synced scoreboard-overlay → docs/ (with .nojekyll)');
+
+const nestedDir = path.join(dstDir, 'scoreboard-overlay');
+fs.mkdirSync(nestedDir, { recursive: true });
+for (const name of FILES) {
+  fs.copyFileSync(path.join(srcDir, name), path.join(nestedDir, name));
+}
+
+console.log('Synced scoreboard-overlay → docs/ and docs/scoreboard-overlay/ (with .nojekyll)');
