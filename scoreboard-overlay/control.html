@@ -334,6 +334,22 @@
     function canSyncLiveData() {
       return isAuthorized && document.getElementById('liveMode').checked;
     }
+    var notifyAppDebounce;
+    function notifyScorecastAppLive() {
+      clearTimeout(notifyAppDebounce);
+      notifyAppDebounce = setTimeout(function() {
+        try {
+          if (!window.ReactNativeWebView || !window.ReactNativeWebView.postMessage) return;
+          var roomEl = document.getElementById('roomId');
+          var dbEl = document.getElementById('firebaseUrl');
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type: 'scorecast-live',
+            roomId: roomEl ? roomEl.value.trim() : '',
+            dbUrl: dbEl ? dbEl.value.trim() : ''
+          }));
+        } catch (e) {}
+      }, 80);
+    }
     function applyForcedLiveSettings() {
       if (forcedDbUrl) document.getElementById('firebaseUrl').value = forcedDbUrl;
       if (forcedRoomId) document.getElementById('roomId').value = forcedRoomId;
@@ -349,6 +365,7 @@
       if (liveToggleRow) liveToggleRow.style.display = 'none';
       var firebaseField = document.getElementById('firebaseField');
       if (firebaseField) firebaseField.style.display = 'none';
+      notifyScorecastAppLive();
     }
     function verifyAccess() {
       if (ALLOW_ANONYMOUS_WEB) {
@@ -638,14 +655,22 @@
     document.getElementById('raceTo2').addEventListener('input', function() { markLocalEdit('raceTo2'); updateUrlBox(); schedulePushField('raceTo2'); });
     document.getElementById('s1').addEventListener('input', function() { markLocalEdit('s1'); updateUrlBox(); schedulePushField('s1'); });
     document.getElementById('s2').addEventListener('input', function() { markLocalEdit('s2'); updateUrlBox(); schedulePushField('s2'); });
-    document.getElementById('firebaseUrl').addEventListener('input', maybeStartSync);
+    document.getElementById('firebaseUrl').addEventListener('input', function() {
+      notifyScorecastAppLive();
+      maybeStartSync();
+    });
     document.getElementById('firebaseUrl').addEventListener('change', function() {
       saveLiveSettings();
+      notifyScorecastAppLive();
       if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
     });
-    document.getElementById('roomId').addEventListener('input', maybeStartSync);
+    document.getElementById('roomId').addEventListener('input', function() {
+      notifyScorecastAppLive();
+      maybeStartSync();
+    });
     document.getElementById('roomId').addEventListener('change', function() {
       saveLiveSettings();
+      notifyScorecastAppLive();
       if (document.getElementById('liveMode').checked && getRoomUrl()) { loadFromFirebase(); startSync(); } else stopSync();
     });
     document.getElementById('liveMode').addEventListener('change', function() {

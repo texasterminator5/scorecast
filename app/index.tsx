@@ -8,7 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/providers/auth-provider';
 
-const DEFAULT_CONTROL_URL = 'https://texasterminator5.github.io/Pool-Stream-Overlay/control.html';
+const DEFAULT_CONTROL_URL = 'https://texasterminator5.github.io/scorecast/control.html';
 const BASE_CONTROL_URL = process.env.EXPO_PUBLIC_CONTROL_URL ?? DEFAULT_CONTROL_URL;
 const SUPABASE_PROJECT_URL =
   process.env.EXPO_PUBLIC_SUPABASE_URL ?? process.env.EXPO_PUBLIC_CONTROL_SUPABASE_URL ?? '';
@@ -54,17 +54,23 @@ function withLiveParams(baseUrl: string, email?: string | null, userId?: string 
   const roomId = toRoomId(seed, localPart, userId);
   const url = new URL(normalizedBaseUrl);
   url.searchParams.set('live', '1');
-  url.searchParams.set('lockRoom', '1');
   url.searchParams.set('db', FIREBASE_DB_URL);
   url.searchParams.set('room', roomId);
   return url.toString();
 }
 
-function toOverlayUrl(controlUrl: string) {
+function toOverlayUrl(
+  controlUrl: string,
+  overrides?: { room?: string; db?: string } | null
+) {
   const url = new URL(controlUrl);
   url.pathname = url.pathname
     .replace(/\/control\.html$/i, '/index.html')
     .replace(/\/control$/i, '/index.html');
+  const room = overrides?.room?.trim();
+  const db = overrides?.db?.trim();
+  if (room) url.searchParams.set('room', room);
+  if (db) url.searchParams.set('db', db);
   return url.toString();
 }
 
@@ -74,12 +80,25 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [copyStatus, setCopyStatus] = useState('');
-  const [activeRoomId, setActiveRoomId] = useState('');
+  /** Latest room/db from the WebView control page (may differ from URL after user edits). */
+  const [webviewLive, setWebviewLive] = useState<{ room: string; db: string } | null>(null);
   const controlUrl = useMemo(
     () => withLiveParams(BASE_CONTROL_URL, session?.user?.email, session?.user?.id),
     [session?.user?.email, session?.user?.id]
   );
-  const overlayUrl = useMemo(() => toOverlayUrl(controlUrl), [controlUrl]);
+  const activeRoomId = useMemo(() => {
+    const fromWeb = webviewLive?.room?.trim();
+    if (fromWeb) return fromWeb;
+    try {
+      return new URL(controlUrl).searchParams.get('room') ?? '';
+    } catch {
+      return '';
+    }
+  }, [controlUrl, webviewLive]);
+  const overlayUrl = useMemo(
+    () => toOverlayUrl(controlUrl, webviewLive),
+    [controlUrl, webviewLive]
+  );
   const injectedBootstrap = useMemo(
     () =>
       `
@@ -91,12 +110,7 @@ export default function Index() {
   );
 
   useEffect(() => {
-    try {
-      const url = new URL(controlUrl);
-      setActiveRoomId(url.searchParams.get('room') ?? '');
-    } catch {
-      setActiveRoomId('');
-    }
+    setWebviewLive(null);
   }, [controlUrl]);
 
   const reload = () => {
@@ -108,6 +122,40 @@ export default function Index() {
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
+  };
+
+  const syncOverlayParamsFromWebView = () => {
+    webviewRef.current?.injectJavaScript(`
+      (function(){
+        try {
+          var r=document.getElementById('roomId');
+          var d=document.getElementById('firebaseUrl');
+          if(!r||!window.ReactNativeWebView||!window.ReactNativeWebView.postMessage)return;
+          window.ReactNativeWebView.postMessage(JSON.stringify({
+            type:'scorecast-live',
+            roomId:(r.value||'').trim(),
+            dbUrl:d?(d.value||'').trim():''
+          }));
+        } catch(e) {}
+      })();true;
+    `);
+  };
+
+  const onWebViewMessage = (event: { nativeEvent: { data: string } }) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data) as {
+        type?: string;
+        roomId?: string;
+        dbUrl?: string;
+      };
+      if (data?.type !== 'scorecast-live') return;
+      setWebviewLive({
+        room: (data.roomId ?? '').trim(),
+        db: (data.dbUrl ?? '').trim(),
+      });
+    } catch {
+      /* ignore non-JSON messages */
+    }
   };
 
   const copyOverlayUrl = async () => {
@@ -183,7 +231,11 @@ export default function Index() {
             style={styles.webview}
             injectedJavaScriptBeforeContentLoaded={injectedBootstrap}
             onLoadStart={() => setLoading(true)}
-            onLoadEnd={() => setLoading(false)}
+            onLoadEnd={() => {
+              setLoading(false);
+              syncOverlayParamsFromWebView();
+            }}
+            onMessage={onWebViewMessage}
             onError={() => { setLoading(false); setError(true); }}
             javaScriptEnabled={true}
             domStorageEnabled={true}
