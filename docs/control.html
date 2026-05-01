@@ -302,6 +302,8 @@
     </div>
   </div>
   <div class="toast" id="toast">URL copied to clipboard</div>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
   <script>
     var LIVE_STORAGE = 'pool-overlay-live';
     var query = new URLSearchParams(location.search);
@@ -310,7 +312,7 @@
     var forcedLive = (query.get('live') || '').toLowerCase() === '1' || (query.get('live') || '').toLowerCase() === 'true' || (!!forcedDbUrl && !!forcedRoomId);
     var lockRoom = (query.get('lockRoom') || '').toLowerCase() === '1' || (query.get('lockRoom') || '').toLowerCase() === 'true';
     var ALWAYS_LIVE = true;
-    var LOCAL_EDIT_GRACE_MS = 1800;
+    var LOCAL_EDIT_GRACE_MS = 900;
     var lastEditedAt = {};
     var isAuthorized = false;
     var ALLOW_ANONYMOUS_WEB = true;
@@ -599,9 +601,55 @@
       });
     }
     var syncInterval;
+    var firebaseRoomListenerRef = null;
+    function firebaseAppNameFromDbUrl(dbUrl) {
+      var h = 5381;
+      for (var i = 0; i < dbUrl.length; i++) {
+        h = ((h << 5) + h) + dbUrl.charCodeAt(i);
+        h |= 0;
+      }
+      return 'pool_rtdb_' + (h >>> 0).toString(16);
+    }
+    function detachFirebaseRoomListener() {
+      if (firebaseRoomListenerRef) {
+        firebaseRoomListenerRef.off('value');
+        firebaseRoomListenerRef = null;
+      }
+    }
+    function attachFirebaseRoomListener(dbUrl, roomId) {
+      if (typeof firebase === 'undefined' || !firebase.initializeApp || typeof firebase.database !== 'function') {
+        return false;
+      }
+      try {
+        var appName = firebaseAppNameFromDbUrl(dbUrl);
+        var app;
+        try {
+          app = firebase.app(appName);
+        } catch (e) {
+          app = firebase.initializeApp({ databaseURL: dbUrl }, appName);
+        }
+        var db = firebase.database(app);
+        firebaseRoomListenerRef = db.ref('rooms/' + roomId);
+        firebaseRoomListenerRef.on('value', function(snapshot) {
+          var data = snapshot.val();
+          if (!data || typeof data !== 'object') return;
+          applyStateToForm(data, true);
+          updateUrlBox();
+        });
+        return true;
+      } catch (err) {
+        detachFirebaseRoomListener();
+        return false;
+      }
+    }
     function startSync() {
-      clearInterval(syncInterval);
+      stopSync();
       if (!canSyncLiveData() || !getRoomUrl()) return;
+      var dbUrl = document.getElementById('firebaseUrl').value.trim();
+      var roomId = document.getElementById('roomId').value.trim();
+      if (attachFirebaseRoomListener(dbUrl, roomId)) {
+        return;
+      }
       fetchRoom().then(function(data) {
         if (data) applyStateToForm(data, true);
       });
@@ -614,6 +662,7 @@
     function stopSync() {
       clearInterval(syncInterval);
       syncInterval = null;
+      detachFirebaseRoomListener();
     }
     function runSyncOnce() {
       if (!canSyncLiveData() || !getRoomUrl()) return;
